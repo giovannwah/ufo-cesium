@@ -1,0 +1,28 @@
+# syntax=docker/dockerfile:1
+FROM python:3.9-alpine
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV POETRY_VERSION $POETRY_VERSION
+
+COPY ./backend/poetry.lock ./backend/install-poetry.py ./backend/pyproject.toml /code/
+
+# Set work directory
+WORKDIR /code
+
+# Install dependencies
+RUN python install-poetry.py --version $POETRY_VERSION
+# modify the path so that we can use poetry as a command
+# seems to be a bug
+# ENV PATH="/root/.poetry/bin:$PATH"
+
+# # force global install
+RUN poetry config virtualenvs.create false
+RUN poetry update
+RUN poetry install --no-interaction --no-ansi
+
+ENV DJANGO_SETTINGS_MODULE ufo.settings
+
+# Copy project
+COPY . /code/
