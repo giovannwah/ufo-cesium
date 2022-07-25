@@ -1,32 +1,32 @@
 version: "3.9"
-<<<<<<< HEAD
-services:
-  backend:
-  db:
-  frontend:
-=======
 
 services:
   db:
+    container_name: ufo-cesium-db
     image: postgres
     volumes:
       - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${PG_DB_NAME}
   backend:
-    build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    container_name: ufo-cesium-backend
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        - POETRY_VERSION=${POETRY_VERSION}
+    command: python backend/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    expose:
+      - ${BACKEND_PORT}
     environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - PG_USER=postgres
-      - PG_PASSWORD=postgres
-      - PG_HOST=db
-      - PG_PORT=5432
-      - PG_DB_NAME=ufo_sightings
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${PG_DB_NAME}
     depends_on:
       - db
->>>>>>> master

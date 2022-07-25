@@ -1,26 +1,35 @@
 # syntax=docker/dockerfile:1
 FROM python:3.9-alpine
 
-# Set environment variables
+ARG POETRY_VERSION
+
+ENV POETRY_VERSION $POETRY_VERSION
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV POETRY_VERSION $POETRY_VERSION
+ENV PYTHONHASHSEED random
+ENV PIP_NO_CACHE_DIR off
+ENV PIP_DISABLE_PIP_VERSION_CHECK on
+ENV PIP_DEFAULT_TIMEOUT 100
 
-COPY ./backend/poetry.lock ./backend/install-poetry.py ./backend/pyproject.toml /code/
+# Install poetry
+# RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+RUN pip install "poetry==$POETRY_VERSION"
 
-# Set work directory
 WORKDIR /code
 
-# Install dependencies
-RUN python install-poetry.py --version $POETRY_VERSION
-# modify the path so that we can use poetry as a command
-# seems to be a bug
-# ENV PATH="/root/.poetry/bin:$PATH"
+COPY ./backend/poetry.lock ./backend/pyproject.toml /code/
 
-# # force global install
+# modify the path so that we can use poetry as a command
+# ENV PATH="$PATH:/root/.poetry/bin"
+
+# force global install
 RUN poetry config virtualenvs.create false
-RUN poetry update
-RUN poetry install --no-interaction --no-ansi
+
+# Install poetry and dependencies necessary for psycopg2
+RUN apk add --no-cache postgresql-libs && \
+    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
+    poetry install --no-interaction --no-ansi && \
+    apk --purge del .build-deps
 
 ENV DJANGO_SETTINGS_MODULE ufo.settings
 
