@@ -11,21 +11,16 @@ ENV PIP_NO_CACHE_DIR off
 ENV PIP_DISABLE_PIP_VERSION_CHECK on
 ENV PIP_DEFAULT_TIMEOUT 100
 
+WORKDIR /install
 # Install poetry
-# RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 RUN pip install "poetry==$POETRY_VERSION"
 
-WORKDIR /code
-
-COPY ./backend/poetry.lock ./backend/pyproject.toml /code/
-
-# modify the path so that we can use poetry as a command
-# ENV PATH="$PATH:/root/.poetry/bin"
+COPY ./backend/poetry.lock ./backend/pyproject.toml /install/
 
 # force global install
 RUN poetry config virtualenvs.create false
 
-# Install poetry and dependencies necessary for psycopg2
+# Install dependencies
 RUN apk add --no-cache postgresql-libs && \
     apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
     poetry install --no-interaction --no-ansi && \
@@ -33,5 +28,7 @@ RUN apk add --no-cache postgresql-libs && \
 
 ENV DJANGO_SETTINGS_MODULE ufo.settings
 
+WORKDIR /app
+
 # Copy project
-COPY . /code/
+# COPY . /code/

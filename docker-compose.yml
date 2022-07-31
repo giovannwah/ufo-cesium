@@ -4,7 +4,13 @@ services:
   db:
     container_name: ufo-cesium-db
     image: postgres
+    restart: unless-stopped
+    expose:
+      - ${PG_PORT}
+    ports:
+      - "${DB_HOST_PORT}:${PG_PORT}"
     volumes:
+      # TODO: use named volume for db data
       - ./data/db:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${PG_USER}
@@ -17,9 +23,10 @@ services:
       dockerfile: Dockerfile.backend
       args:
         - POETRY_VERSION=${POETRY_VERSION}
+    restart: unless-stopped
     command: python backend/manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/code
+      - .:/app
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     expose:

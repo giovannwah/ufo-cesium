@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 
 
 class LocationManager(models.Manager):
@@ -66,8 +65,8 @@ class Location(models.Model):
     state = models.CharField(max_length=2, choices=State.choices, default=None)
     city = models.CharField(max_length=64)
     country = models.CharField(max_length=64)
-    longitude = models.DecimalField(max_digits=10, decimal_places=7)
-    latitude = models.DecimalField(max_digits=10, decimal_places=7)
+    longitude = models.DecimalField(max_digits=17, decimal_places=14)
+    latitude = models.DecimalField(max_digits=17, decimal_places=14)
 
     objects = LocationManager()
 
@@ -114,15 +113,13 @@ class Sighting(models.Model):
 
     ufo_shape = models.CharField(max_length=16, choices=Shape.choices, default=Shape.UNKNOWN)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
-    duration = models.CharField(max_length=32)
+    duration = models.CharField(max_length=32, default=None)
     sighting_datetime = models.DateTimeField()
-    description = models.CharField(max_length=1028)
+    description = models.CharField(max_length=1028, default=None)
     # Meta info
     created_datetime = models.DateTimeField(auto_now_add=True)
     modified_datetime = models.DateTimeField(auto_now=True)
-    created_by_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
-        return 'Date: {0}\nLocation: {1}\nDuration: {2}\nShape: {3}\nUser: {4}' \
-            .format(self.sighting_datetime, self.location.__str__(), self.duration, self.ufo_shape,
-                    self.created_by_user.__str__())
+        return 'Date: {0}, Location: {1}, Shape: {2}' \
+            .format(self.sighting_datetime, self.location.__str__(), self.ufo_shape,)
