@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class LocationManager(models.Manager):
@@ -123,3 +124,51 @@ class Sighting(models.Model):
     def __str__(self):
         return 'Date: {0}, Location: {1}, Shape: {2}' \
             .format(self.sighting_datetime, self.location.__str__(), self.ufo_shape,)
+
+
+class Post(models.Model):
+    """
+    Model representing a particular post made by a user
+    """
+    class Shape(models.TextChoices):
+        CHANGING = 'changing'
+        CHEVRON = 'chevron'
+        CIGAR = 'cigar'
+        CIRCLE = 'circle'
+        CONE = 'cone',
+        CRESCENT = 'crescent'
+        CROSS = 'cross'
+        CYLINDER = 'cylinder'
+        DELTA = 'delta'
+        DIAMOND = 'diamond'
+        DISK = 'disk'
+        EGG = 'egg'
+        FIREBALL = 'fireball'
+        FLASH = 'flash'
+        FORMATION = 'formation'
+        LIGHT = 'light'
+        OTHER = 'other'
+        OVAL = 'oval'
+        PYRAMID = 'pyramid'
+        RECTANGLE = 'rectangle'
+        ROUND = 'round'
+        SPHERE = 'sphere'
+        TEARDROP = 'teardrop'
+        TRIANGLE = 'triangle'
+        UNKNOWN = 'unknown'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    sighting = models.ForeignKey(Sighting, on_delete=models.CASCADE)
+    ufo_shape = models.CharField(max_length=16, choices=Shape.choices, default=Shape.UNKNOWN)
+    duration = models.CharField(max_length=32, default=None)
+    description = models.CharField(max_length=1028, default=None)
+    created_datetime = models.DateTimeField(auto_now_add=True)
+    modified_datetime = models.DateTimeField(auto_now=True)
+
+
+class Profile(models.Model):
+    """
+    Model representing a user's profile information
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    favorites = models.ManyToManyField(Post, blank=True)
