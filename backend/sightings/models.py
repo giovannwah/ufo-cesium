@@ -85,45 +85,16 @@ class Sighting(models.Model):
     """
     Model representing a particular UFO sighting at a particular time and place
     """
-    class Shape(models.TextChoices):
-        CHANGING = 'changing'
-        CHEVRON = 'chevron'
-        CIGAR = 'cigar'
-        CIRCLE = 'circle'
-        CONE = 'cone',
-        CRESCENT = 'crescent'
-        CROSS = 'cross'
-        CYLINDER = 'cylinder'
-        DELTA = 'delta'
-        DIAMOND = 'diamond'
-        DISK = 'disk'
-        EGG = 'egg'
-        FIREBALL = 'fireball'
-        FLASH = 'flash'
-        FORMATION = 'formation'
-        LIGHT = 'light'
-        OTHER = 'other'
-        OVAL = 'oval'
-        PYRAMID = 'pyramid'
-        RECTANGLE = 'rectangle'
-        ROUND = 'round'
-        SPHERE = 'sphere'
-        TEARDROP = 'teardrop'
-        TRIANGLE = 'triangle'
-        UNKNOWN = 'unknown'
 
-    ufo_shape = models.CharField(max_length=16, choices=Shape.choices, default=Shape.UNKNOWN)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
-    duration = models.CharField(max_length=32, default=None)
     sighting_datetime = models.DateTimeField()
-    description = models.CharField(max_length=1028, default=None)
     # Meta info
     created_datetime = models.DateTimeField(auto_now_add=True)
     modified_datetime = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return 'Date: {0}, Location: {1}, Shape: {2}' \
-            .format(self.sighting_datetime, self.location.__str__(), self.ufo_shape,)
+        return 'Date: {0}, Location: {1}' \
+            .format(self.sighting_datetime, self.location.__str__(),)
 
 
 class Post(models.Model):
@@ -165,6 +136,9 @@ class Post(models.Model):
     created_datetime = models.DateTimeField(auto_now_add=True)
     modified_datetime = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return '{0}: Post {1}'.format(self.user.username, self.pk)
+
 
 class Profile(models.Model):
     """
@@ -172,3 +146,6 @@ class Profile(models.Model):
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     favorites = models.ManyToManyField(Post, blank=True)
+
+    def __str__(self):
+        return self.user.username
