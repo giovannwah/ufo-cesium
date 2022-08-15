@@ -4,6 +4,11 @@ django.setup()
 
 
 def make_posts():
+    """
+    Use django orm to convert sightings in nuforc format to
+    new Posts and Sightings
+    :return:
+    """
     from django.contrib.auth.models import User
     from sightings.models import Sighting, Post
 

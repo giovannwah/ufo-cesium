@@ -10,8 +10,8 @@ services:
     ports:
       - "${DB_HOST_PORT}:${PG_PORT}"
     volumes:
-      # TODO: use named volume for db data
-      - ./data/db:/var/lib/postgresql/data
+      # - ./data/db:/var/lib/postgresql/data
+      - postgres_db:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
@@ -24,16 +24,20 @@ services:
       args:
         - POETRY_VERSION=${POETRY_VERSION}
     restart: unless-stopped
-    command: python backend/manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app
+      - ./backend:/app
+      - ./.env:/app/.env
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     expose:
       - ${BACKEND_PORT}
-    environment:
-      - POSTGRES_USER=${PG_USER}
-      - POSTGRES_PASSWORD=${PG_PASSWORD}
-      - POSTGRES_DB=${PG_DB_NAME}
+#    environment:
+#      - POSTGRES_USER=${PG_USER}
+#      - POSTGRES_PASSWORD=${PG_PASSWORD}
+#      - POSTGRES_DB=${PG_DB_NAME}
     depends_on:
       - db
+
+volumes:
+  postgres_db:

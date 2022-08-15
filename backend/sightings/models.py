@@ -137,7 +137,7 @@ class Post(models.Model):
     modified_datetime = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return '{0}: Post {1}'.format(self.user.username, self.pk)
+        return '{0}: Post {1}, Sighting {2}'.format(self.user.username, self.pk, self.sighting.pk)
 
 
 class Profile(models.Model):
