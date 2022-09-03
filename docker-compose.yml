@@ -10,7 +10,6 @@ services:
     ports:
       - "${DB_HOST_PORT}:${PG_PORT}"
     volumes:
-      # - ./data/db:/var/lib/postgresql/data
       - postgres_db:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${PG_USER}
@@ -32,10 +31,6 @@ services:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     expose:
       - ${BACKEND_PORT}
-#    environment:
-#      - POSTGRES_USER=${PG_USER}
-#      - POSTGRES_PASSWORD=${PG_PASSWORD}
-#      - POSTGRES_DB=${PG_DB_NAME}
     depends_on:
       - db
 
