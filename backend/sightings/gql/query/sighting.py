@@ -1,9 +1,9 @@
-import strawberry
+from typing import Optional
+from strawberry_django_plus import gql
+from sightings.gql.types.sighting import SightingType
 
-from sightings.gql.types.sighting import Sighting
-from sightings.gql.resolvers.sighting import get_sighting
 
-
-@strawberry.type
+@gql.type
 class Query:
-    sighting: Sighting = strawberry.field(resolver=get_sighting)
+    sighting: Optional[SightingType] = gql.relay.node()
+    sighting_connection: gql.relay.Connection[SightingType] = gql.relay.connection()

@@ -1,9 +1,9 @@
-import strawberry
+from typing import Optional
+from strawberry_django_plus import gql
+from sightings.gql.types.location import LocationType
 
-from sightings.gql.types.location import Location
-from sightings.gql.resolvers.location import get_location
 
-
-@strawberry.type
+@gql.type
 class Query:
-    location: Location = strawberry.field(resolver=get_location)
+    location: Optional[LocationType] = gql.relay.node()
+    location_connection: gql.relay.Connection[LocationType] = gql.relay.connection()
