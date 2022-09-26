@@ -13,3 +13,4 @@ class LocationType(gql.relay.Node):
     country: auto
     city: auto
     state: auto
+    state_name: auto

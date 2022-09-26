@@ -1,8 +1,21 @@
 # UFO-CESIUM
 
 ## Overview
+UFO Cesium is a small web app allowing registered users to view, search for, and record new ufo sightings from all around the world. Built using 
+Django, Strawberry-Graphql.
 
-## Installation
+## Getting Started
+
+### Requirements
+- Docker Compose v1.29.0+ 
+- Docker v20.10.0+
+
+### Installation
+
+After cloning the repo,
+1. Fill in the required values in the .env file.
+2. Run `docker-compose up` to build the images and bring up the containers.
+3. Go to `localhost:<BACKEND_PORT>/api` to access the graphql UI.
 
 __Load Base Data__
 
