@@ -1,5 +1,5 @@
 from django.db.models import Q
-from sightings.gql.types.sorting import SortInput, SortOrder
+from sightings.gql.types.sorting import SortInput
 from sightings.models import Location
 from sightings.helpers.common import get_order_by_field
 
@@ -36,13 +36,28 @@ def locations_q_by_state_name_contains(state_name_contains: str):
     return Q(state_name__icontains=state_name_contains) if state_name_contains else Q()
 
 
-def locations_q_by_search_query(q: str):
+def contains_query(q: str):
     return (
-        locations_q_by_country_contains(q) |
-        locations_q_by_state_contains(q) |
-        locations_q_by_city_contains(q) |
-        locations_q_by_state_name_contains(q)
+            locations_q_by_country_contains(q) |
+            locations_q_by_state_contains(q) |
+            locations_q_by_city_contains(q) |
+            locations_q_by_state_name_contains(q)
     )
+
+
+def locations_q_by_search_query(q: str):
+    """
+    Split up query string and turn each into a separate Q() object to be combined
+    into a single "&" query.
+    :param q: query string, space separated
+    :return: django Q object
+    """
+    query_terms = list(map(contains_query, q.split(' ')))
+    query = Q()
+    for term in query_terms:
+        query &= term
+
+    return query
 
 
 def locations_filter_sort(
@@ -53,7 +68,17 @@ def locations_filter_sort(
     q: str = None,
     sort: SortInput = None
 ):
-
+    """
+    Given filter values city_exact, state_exact, state_name_exact, and country_exact, query string q, and sort object,
+    filter and sort Locations
+    :param city_exact: city name, case-insensitive
+    :param state_exact: state abbreviation, case-insensitive
+    :param state_name_exact: exact state name, case-insensitive
+    :param country_exact: exact country name, case-insensitive
+    :param q: query string, space separated
+    :param sort: SortInput object
+    :return: Locations queryset
+    """
     if any(i.strip() == "" for i in [city_exact, state_exact, state_name_exact, country_exact, q] if i is not None):
         return Location.objects.none()
 
