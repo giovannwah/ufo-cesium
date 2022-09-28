@@ -109,3 +109,7 @@ def locations_filter_sort(
         locations = locations.order_by(order)
 
     return locations
+
+
+def validate_longitude_latitude(longitude: float, latitude: float):
+    return abs(longitude) <= 180 and abs(latitude) <= 90

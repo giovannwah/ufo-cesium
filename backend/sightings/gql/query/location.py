@@ -1,6 +1,6 @@
 from typing import Optional, Iterable
 from strawberry_django_plus import gql
-from sightings.gql.types.location import LocationType
+from sightings.gql.types.location import LocationNode
 from sightings.helpers.locations import (
     locations_filter_sort,
 )
@@ -9,7 +9,7 @@ from sightings.gql.types.sorting import SortInput
 
 @gql.type
 class Query:
-    location: Optional[LocationType] = gql.relay.node(
+    location: Optional[LocationNode] = gql.relay.node(
         description="A node representing a geographic location",
     )
 
@@ -17,14 +17,14 @@ class Query:
         description="A collection of nodes representing geographic locations",
     )
     def location_connection(
-            self,
-            city_exact: Optional[str] = None,
-            state_exact: Optional[str] = None,
-            state_name_exact: Optional[str] = None,
-            country_exact: Optional[str] = None,
-            q: Optional[str] = None,
-            sort: Optional[SortInput] = None
-    ) -> Iterable[LocationType]:
+        self,
+        city_exact: Optional[str] = None,
+        state_exact: Optional[str] = None,
+        state_name_exact: Optional[str] = None,
+        country_exact: Optional[str] = None,
+        q: Optional[str] = None,
+        sort: Optional[SortInput] = None
+    ) -> Iterable[LocationNode]:
         """
         Filterable location connection
         """

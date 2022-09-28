@@ -1,17 +1,17 @@
 from strawberry import auto
 from strawberry_django_plus import gql
-from sightings.gql.types.sighting import SightingType
-from sightings.gql.types.user import UserType
+from sightings.gql.types.sighting import SightingNode
+from sightings.gql.types.user import UserNode
 from sightings.models import Post
 
 
 @gql.django.type(Post)
-class PostType(gql.relay.Node):
+class PostNode(gql.relay.Node):
     """
     GQL type definition for a Post Node
     """
-    user: UserType
-    sighting: SightingType
+    user: UserNode
+    sighting: SightingNode
     ufo_shape: auto
     duration: auto
     description: auto

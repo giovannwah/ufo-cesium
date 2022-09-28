@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 
 @gql.django.type(User)
-class UserType(gql.relay.Node):
+class UserNode(gql.relay.Node):
     """
     GQL type definition for User Nodes
     """
