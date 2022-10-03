@@ -116,8 +116,8 @@ class Location(models.Model):
         WYOMING = 'Wyoming'
 
     state = models.CharField(max_length=2, choices=State.choices, default=None, blank=True, null=True)
-    state_name = models.CharField(max_length=20, choices=StateName.choices, default='Wyoming', blank=True, null=True)
-    city = models.CharField(max_length=64)
+    state_name = models.CharField(max_length=20, choices=StateName.choices, default=None, blank=True, null=True)
+    city = models.CharField(max_length=64, default=None, blank=True, null=True)
     country = models.CharField(max_length=64)
     longitude = models.DecimalField(max_digits=17, decimal_places=14)
     latitude = models.DecimalField(max_digits=17, decimal_places=14)

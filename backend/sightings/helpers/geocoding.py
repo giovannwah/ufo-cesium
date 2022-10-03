@@ -98,7 +98,7 @@ def evaluate_query(
             print(f'State: {state}')
 
             geolocator = cls(**config)
-            location = geolocator.reverse(query, language='en')
+            location = geolocator.reverse(query, language='en', zoom=10)
 
             address = location.raw['address']
             print(f'location raw: {location.raw}')
