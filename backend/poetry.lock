@@ -82,6 +82,34 @@ django = ">=2.2"
 pytz = "*"
 
 [[package]]
+name = "geographiclib"
+version = "1.52"
+description = "The geodesic routines from GeographicLib"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "geopy"
+version = "2.2.0"
+description = "Python Geocoding Toolbox"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+geographiclib = ">=1.49,<2"
+
+[package.extras]
+timezone = ["pytz"]
+requests = ["requests (>=2.16.2)", "urllib3 (>=1.24.2)"]
+dev-test = ["sphinx", "pytest (>=3.10)", "pytest-aiohttp", "coverage", "async-generator"]
+dev-lint = ["isort (>=5.6.0,<5.7.0)", "flake8 (>=3.8.0,<3.9.0)", "async-generator"]
+dev-docs = ["sphinx-rtd-theme (>=0.5.0)", "sphinx-issues", "sphinx", "readme-renderer"]
+dev = ["sphinx-rtd-theme (>=0.5.0)", "sphinx-issues", "sphinx", "readme-renderer", "pytest (>=3.10)", "pytest-aiohttp", "isort (>=5.6.0,<5.7.0)", "flake8 (>=3.8.0,<3.9.0)", "coverage", "async-generator"]
+aiohttp = ["aiohttp"]
+
+[[package]]
 name = "graphql-core"
 version = "3.2.1"
 description = "GraphQL implementation for Python, a port of GraphQL.js, the JavaScript reference implementation for GraphQL."
@@ -284,7 +312,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "94559847496c491be14b2f1a19976be50de1f5536d3e62b985028246d3b0c380"
+content-hash = "6af6b2eb3dfb6008ee1d6086cecb02b0c45951eef3ca3a44386a78296fdaaaad"
 
 [metadata.files]
 asgiref = []
@@ -294,6 +322,8 @@ django = []
 django-cors-headers = []
 django-environ = []
 djangorestframework = []
+geographiclib = []
+geopy = []
 graphql-core = []
 gunicorn = []
 psycopg2 = []

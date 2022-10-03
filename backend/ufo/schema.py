@@ -1,9 +1,5 @@
 import strawberry
 from strawberry_django_plus.optimizer import DjangoOptimizerExtension
-# from sightings.gql.query.location import Query as LocationQuery
-# from sightings.gql.query.sighting import Query as SightingQuery
-# from sightings.gql.query.post import Query as PostQuery
-# from sightings.gql.query.profile import Query as ProfileQuery
 from sightings.gql.query import (
     LocationQuery,
     SightingQuery,
@@ -31,7 +27,7 @@ class RootQuery(
 
 @strawberry.type
 class RootMutation(
-    LocationMutation, SightingMutation, PostMutation, ProfileMutation, UserMutation
+    LocationMutation
 ):
     """
     Root GQL mutation, inherits from all other mutations

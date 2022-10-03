@@ -3,16 +3,17 @@ from strawberry_django_plus import gql
 from sightings.models import Location
 
 
-@gql.django.input(Location)
-class LocationCreateInput:
+@gql.django.type(Location)
+class LocationType:
     """
-    Location Input type for "create" mutation
+    Location Output type for "create" mutation
     """
-    longitude: auto
-    latitude: auto
-    country: auto
-    city: auto
-    state: auto
+    longitude: float
+    latitude: float
+    country: str
+    city: str
+    state: str
+    state_name: str
 
 
 @gql.django.type(Location)

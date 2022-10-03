@@ -115,6 +115,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOCATION_PRECISION = 100  # In meters
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
