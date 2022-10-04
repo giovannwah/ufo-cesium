@@ -1,11 +1,15 @@
 from typing import Optional
+from strawberry_django_plus.relay import to_base64
 from django.db.models import Q
 from sightings.gql.types.sorting import SortInput
-from sightings.models import Location
 from sightings.helpers.common import get_order_by_field
-from sightings.gql.types.location import LocationType
+from sightings.gql.types.location import LocationType, LocationNode
 from sightings.models import Location
-from sightings.helpers.geocoding import validate_location_coordinates, STATE_MAP
+from sightings.helpers.geocoding import (
+    verify_location_coordinates,
+    create_and_validate_location,
+    map_state_abr_to_name,
+)
 
 
 def locations_q_by_state_exact(state_exact: str):
@@ -115,18 +119,6 @@ def locations_filter_sort(
     return locations
 
 
-def map_state_abr_to_name(state_abr: str):
-    """
-    Maps a state abbreviation to the correct state name.
-    :param state_abr:
-    :return:
-    """
-    if state_abr is None:
-        return None
-
-    return STATE_MAP.get(state_abr.upper(), None)
-
-
 def create_location(location_input: dict) -> Optional[LocationType]:
     """
     Create a new Location object in the database, and return a LocationType, if input passes validation and
@@ -136,16 +128,24 @@ def create_location(location_input: dict) -> Optional[LocationType]:
     {
         "latitude": float,
         "longitude": float,
-        "country": str,
-        "city": str,
-        "state": Optional[str]
+        "country": Union[str, None],
+        "city": Union[str, None],
+        "state": Union[str, None]
     }
-    :return:
+    :return: LocationType
     """
-    if validate_location_coordinates(**location_input):
+
+    if verify_location_coordinates(**location_input):
+        location = create_and_validate_location(**location_input)
+        location.save()
         return LocationType(
-            **location_input,
-            state_name=map_state_abr_to_name(location_input["state"])
+            id=to_base64(LocationNode.__name__, location.pk),
+            latitude=location.latitude,
+            longitude=location.longitude,
+            city=location.city,
+            state=location.state,
+            state_name=location.state_name,
+            country=location.country,
         )
 
     return None

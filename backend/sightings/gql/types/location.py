@@ -1,3 +1,4 @@
+from typing import Optional
 from strawberry import auto
 from strawberry_django_plus import gql
 from sightings.models import Location
@@ -8,12 +9,13 @@ class LocationType:
     """
     Location Output type for "create" mutation
     """
+    id: str
     longitude: float
     latitude: float
-    country: str
-    city: str
-    state: str
-    state_name: str
+    country: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    state_name: Optional[str]
 
 
 @gql.django.type(Location)

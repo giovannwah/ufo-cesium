@@ -131,7 +131,7 @@ class Location(models.Model):
 
     def __str__(self):
         s = '{0}, {1}'.format(self.state, self.country) if self.state else '{0}'.format(self.country)
-        return '{0}, {1} (lat: {2}, lon: {3})'.format(self.city, s, self.latitude, self.longitude)
+        return '{0}, {1} ({2}, {3})'.format(self.city, s, self.latitude, self.longitude)
 
 
 class Sighting(models.Model):

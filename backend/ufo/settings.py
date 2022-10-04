@@ -115,8 +115,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOCATION_PRECISION = 100  # In meters
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -139,3 +137,5 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOCATION_DISTANCE_THRESHOLD = 50  # meters

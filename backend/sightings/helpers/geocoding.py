@@ -1,9 +1,14 @@
-from typing import Optional
+from typing import Optional, Iterable
+from django.db.models import Q
+from django.db.models.query import QuerySet
+from django.conf import settings
 from geopy.geocoders import (
     get_geocoder_for_service,
     GeocoderNotFound,
 )
+from geopy import distance
 from sightings.exceptions import LocationValidationException
+from sightings.models import Location
 
 
 STATE_MAP = {
@@ -77,10 +82,11 @@ def validate_longitude_latitude(longitude: float, latitude: float) -> bool:
 
 
 def evaluate_query(
-        services: list, query: str, city: str, country: str, state: str = None
+    services: list, query: str, city: str = None, country: str = None, state: str = None
 ) -> bool:
     """
     Evaluate whether a location query, "<latitude>, <longitude>", corresponds to an existing
+    location, using geocoders listed in services
     :param services: list of services to use to build geocoders
     :param query: string, "<latitude>, <longitude>"
     :param city:
@@ -91,38 +97,33 @@ def evaluate_query(
         try:
             cls = get_geocoder_for_service(service)
             config = generate_geocoder_config_for_service(service)
-            print(f'Config: {config}')
-            print(f'Query: {query}')
-            print(f'City: {city}')
-            print(f'Country: {country}')
-            print(f'State: {state}')
 
             geolocator = cls(**config)
             location = geolocator.reverse(query, language='en', zoom=10)
 
-            address = location.raw['address']
-            print(f'location raw: {location.raw}')
-            print(f'location address: {address}')
-            found_city = address['city'] if 'city' in address else address['town']
+            address = location.raw.get('address')
+            city_or_town = address.get('city') if 'city' in address else address.get('town', "")
 
-            if city.lower() == found_city.lower() and \
-                    country.lower() == address['country'].lower():
-                print('City matches')
-                if state and state.lower() != address['state'] and STATE_MAP.get(state.upper()) != address['state']:
-                    return False
+            if city and city.lower() != city_or_town.lower():
+                continue
 
-                print('State matches')
-                return True
+            if country and country.lower() != address.get('country', "").lower():
+                continue
+
+            if state and state.lower() != address.get('state', "").lower() and \
+                    STATE_MAP.get(state.upper()) != address.get('state', "").lower():
+                continue
+
+            return True
 
         except GeocoderNotFound:
-            print('Geocoder Not found...')
             continue
 
     return False
 
 
-def validate_location_coordinates(
-    latitude: float, longitude: float, city: str, country: str, state: str=None
+def verify_location_coordinates(
+    latitude: float, longitude: float, city: str = None, country: str = None, state: str = None
 ) -> bool:
     """
     Verify that the latitude and longitude values provided correspond to accurately to the
@@ -134,9 +135,73 @@ def validate_location_coordinates(
         msg = f'Invalid latitude, longitude: ({query})'
         raise LocationValidationException(msg)
 
+    if country is None and state is None and city is None:
+        return True
+
     # geocoder services to loop through in order to validate address
     geocoder_services = ['nominatim']
 
     return evaluate_query(
         services=geocoder_services, query=query, city=city, country=country, state=state,
     )
+
+
+def generate_lat_lon_nearby_query(latitude: float, longitude: float, precision: float):
+    return Q(
+        latitude__lt=latitude + precision,
+        latitude__gt=latitude - precision,
+        longitude__lt=longitude + precision,
+        longitude__gt=longitude - precision,
+    )
+
+
+def find_closest_location(locations: QuerySet, latitude: float, longitude: float):
+    diff = float('inf')
+    nearest = None
+    for location in locations:
+        dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters
+        if dist <= settings.LOCATION_DISTANCE_THRESHOLD and dist < diff:
+            diff = dist
+            nearest = location
+
+    return nearest
+
+
+def map_state_abr_to_name(state_abr: str):
+    """
+    Maps a state abbreviation to the correct state name.
+    :param state_abr:
+    :return:
+    """
+    if state_abr is None:
+        return None
+
+    return STATE_MAP.get(state_abr.upper(), None)
+
+
+def create_and_validate_location(
+    latitude: float, longitude: float, city: str = None, country: str = None, state: str = None
+) -> Optional[Location]:
+    """
+    Verify the new Location can be added given existing Locations. If the new location is
+    within a certain distance threshold of an existing location, return the nearest location.
+    Otherwise, return new Location.
+    :return:
+    """
+    query = generate_lat_lon_nearby_query(latitude, longitude, 0.001)
+    locations = Location.objects.filter(query)
+    nl = find_closest_location(locations, latitude, longitude)
+
+    if nl is None:
+        state_name = map_state_abr_to_name(state.upper()) if state else None
+        loc = Location(
+            latitude=latitude,
+            longitude=longitude,
+            city=city,
+            country=country,
+            state=state.upper() if state else None,
+            state_name=state_name
+        )
+        return loc
+
+    return nl
