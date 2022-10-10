@@ -6,7 +6,7 @@ from sightings.helpers.common import get_order_by_field
 from sightings.gql.types.location import (
     LocationType,
     LocationNode,
-    DistanceFromInput,
+    LocationFilterInput,
 )
 from sightings.models import Location
 from sightings.helpers.geocoding import (
@@ -74,31 +74,32 @@ def locations_q_by_search_query(q: str):
 
 
 def locations_filter_sort(
-    city_exact: str = None,
-    state_exact: str = None,
-    state_name_exact: str = None,
-    country_exact: str = None,
-    distance_from: DistanceFromInput = None,
-    q: str = None,
+    location_filter: LocationFilterInput = None,
     sort: SortInput = None
 ):
     """
     Given filter values city_exact, state_exact, state_name_exact, and country_exact, query string q, and sort object,
     filter and sort Locations
-    :param city_exact: city name, case-insensitive
-    :param state_exact: state abbreviation, case-insensitive
-    :param state_name_exact: exact state name, case-insensitive
-    :param country_exact: exact country name, case-insensitive
-    :param distance_from: input type specifying a range of locations within or outside of some radius around a central
-    location
-    :param q: query string, space separated
+    :param location_filter: LocationFilterInput object
     :param sort: SortInput object
     :return: Locations queryset
     """
+    if location_filter:
+        city_exact = location_filter.city_exact
+        state_exact = location_filter.state_exact
+        state_name_exact = location_filter.state_name_exact
+        country_exact = location_filter.country_exact
+        distance_from = location_filter.distance_from
+        q = location_filter.q
+    else:
+        city_exact = state_exact = state_name_exact = country_exact = q = distance_from = None
+
+    # the assumption is that an intentional search for an empty string in any of these fields should yield no results
     if any(i.strip() == "" for i in [city_exact, state_exact, state_name_exact, country_exact, q] if i is not None):
         return Location.objects.none()
 
-    if all(i is None for i in [city_exact, state_exact, state_name_exact, country_exact, q]):
+    # the assumption is that if all filter options are None, then just return all locations with no filtering
+    if all(i is None for i in [city_exact, state_exact, state_name_exact, country_exact, distance_from, q]):
         locations = Location.objects.all()
 
     elif q:
@@ -120,10 +121,6 @@ def locations_filter_sort(
         )
         locations = Location.objects.all().filter(query)
 
-    if sort:
-        order = get_order_by_field(sort.order, sort.field)
-        locations = locations.order_by(order)
-
     if distance_from:
         # Filter found locations
         if distance_from.inside_circle:
@@ -134,6 +131,10 @@ def locations_filter_sort(
             locations = find_locations_by_distance_outside(
                 locations, distance_from.latitude, distance_from.longitude, distance_from.arc_length
             )
+
+    if sort:
+        order = get_order_by_field(sort.order, sort.field)
+        locations = locations.order_by(order)
 
     return locations
 

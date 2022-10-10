@@ -65,6 +65,11 @@ STATE_MAP = {
 
 
 def generate_geocoder_config_for_service(service: str) -> Optional[dict]:
+    """
+    Return service config for a given geocoding service
+    :param service:
+    :return:
+    """
     if service == 'nominatim':
         return {
             "user_agent": "ufo-cesium"
@@ -214,6 +219,14 @@ def create_and_validate_location(
 def find_locations_by_distance_within(
     locations: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
+    """
+    Return all locations within a given distance from a point
+    :param locations:
+    :param latitude:
+    :param longitude:
+    :param arc_length:
+    :return:
+    """
     ids = []
     for location in locations:
         dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters
@@ -226,6 +239,14 @@ def find_locations_by_distance_within(
 def find_locations_by_distance_outside(
     locations: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
+    """
+    Return all locations outside of a given distance from a certain point
+    :param locations:
+    :param latitude:
+    :param longitude:
+    :param arc_length:
+    :return:
+    """
     ids = []
     for location in locations:
         dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters

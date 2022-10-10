@@ -2,7 +2,7 @@ from typing import Optional, Iterable
 from strawberry_django_plus import gql
 from sightings.gql.types.location import (
     LocationNode,
-    DistanceFromInput,
+    LocationFilterInput,
 )
 from sightings.helpers.locations import (
     locations_filter_sort,
@@ -21,31 +21,15 @@ class Query:
     )
     def location_connection(
         self,
-        city_exact: Optional[str] = None,
-        state_exact: Optional[str] = None,
-        state_name_exact: Optional[str] = None,
-        country_exact: Optional[str] = None,
-        distance_from: Optional[DistanceFromInput] = None,
-        q: Optional[str] = None,
+        location_filter: Optional[LocationFilterInput] = None,
         sort: Optional[SortInput] = None
     ) -> Iterable[LocationNode]:
         """
         Filterable location connection
-        :param city_exact: city name, case-insensitive
-        :param state_exact: state abbreviation, case-insensitive
-        :param state_name_exact: exact state name, case-insensitive
-        :param country_exact: exact country name, case-insensitive
-        :param distance_from: input type specifying a range of locations within or outside of some radius around a central
-        location
-        :param q: query string, space separated
+        :param location_filter: LocationFilterInput object
         :param sort: SortInput object
         """
         return locations_filter_sort(
-            city_exact=city_exact,
-            state_exact=state_exact,
-            state_name_exact=state_name_exact,
-            country_exact=country_exact,
-            distance_from=distance_from,
-            q=q,
+            location_filter=location_filter,
             sort=sort
         )

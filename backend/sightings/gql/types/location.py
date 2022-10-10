@@ -52,6 +52,19 @@ class DistanceFromInput:
     inside_circle: bool
 
 
+@gql.input
+class LocationFilterInput:
+    """
+    Input type for filtering locations
+    """
+    city_exact: Optional[str] = None
+    state_exact: Optional[str] = None
+    state_name_exact: Optional[str] = None
+    country_exact: Optional[str] = None
+    distance_from: Optional[DistanceFromInput] = None
+    q: Optional[str] = None
+
+
 @gql.django.type(Location)
 class LocationType:
     """
