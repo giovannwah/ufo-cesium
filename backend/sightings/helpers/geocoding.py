@@ -1,4 +1,4 @@
-from typing import Optional, Iterable
+from typing import Optional
 from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.conf import settings
@@ -9,7 +9,6 @@ from geopy.geocoders import (
 from geopy import distance
 from sightings.exceptions import LocationValidationException
 from sightings.models import Location
-
 
 STATE_MAP = {
     "AL": "Alabama",
@@ -147,6 +146,9 @@ def verify_location_coordinates(
 
 
 def generate_lat_lon_nearby_query(latitude: float, longitude: float, precision: float):
+    """
+    Generate a simple location-based query given the precision error value
+    """
     return Q(
         latitude__lt=latitude + precision,
         latitude__gt=latitude - precision,
@@ -156,6 +158,10 @@ def generate_lat_lon_nearby_query(latitude: float, longitude: float, precision: 
 
 
 def find_closest_location(locations: QuerySet, latitude: float, longitude: float):
+    """
+    Find location in locations that is closest in distance to latitude and longitude, and within
+    the LOCATION_DISTANCE_THRESHOLD
+    """
     diff = float('inf')
     nearest = None
     for location in locations:
@@ -170,8 +176,6 @@ def find_closest_location(locations: QuerySet, latitude: float, longitude: float
 def map_state_abr_to_name(state_abr: str):
     """
     Maps a state abbreviation to the correct state name.
-    :param state_abr:
-    :return:
     """
     if state_abr is None:
         return None
@@ -188,7 +192,7 @@ def create_and_validate_location(
     Otherwise, return new Location.
     :return:
     """
-    query = generate_lat_lon_nearby_query(latitude, longitude, 0.001)
+    query = generate_lat_lon_nearby_query(latitude, longitude, 0.001)  # 0.001 is an arbitrary precision value
     locations = Location.objects.filter(query)
     nl = find_closest_location(locations, latitude, longitude)
 
@@ -205,3 +209,27 @@ def create_and_validate_location(
         return loc
 
     return nl
+
+
+def find_locations_by_distance_within(
+    locations: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    ids = []
+    for location in locations:
+        dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters
+        if dist <= arc_length:
+            ids.append(location.id)
+
+    return Location.objects.all().filter(id__in=ids)
+
+
+def find_locations_by_distance_outside(
+    locations: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    ids = []
+    for location in locations:
+        dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters
+        if dist > arc_length:
+            ids.append(location.id)
+
+    return Location.objects.all().filter(id__in=ids)
