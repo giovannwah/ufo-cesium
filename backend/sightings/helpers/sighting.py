@@ -6,7 +6,7 @@ from sightings.gql.types.location import LocationFilterInput
 from sightings.gql.types.sorting import SortInput
 from sightings.models import Sighting
 from sightings.helpers.common import get_order_by_field
-from sightings.helpers.locations import locations_filter_sort
+# from sightings.helpers.locations import locations_filter_sort
 from sightings.helpers.geocoding import (
     find_sightings_by_distance_outside,
     find_sightings_by_distance_within,
@@ -26,13 +26,14 @@ def filter_sightings_by_location(
     :param location_filter: LocationFilterInput object
     :param sightings: QuerySet of Sightings
     """
-    locations = locations_filter_sort(location_filter=location_filter)
-    lids = [location.id for location in locations]
-
-    if sightings:
-        return sightings.filter(location__id__in=lids)
-
-    return Sighting.objects.all().filter(location__id__in=lids)
+    # locations = locations_filter_sort(location_filter=location_filter)
+    # lids = [location.id for location in locations]
+    #
+    # if sightings:
+    #     return sightings.filter(location__id__in=lids)
+    #
+    # return Sighting.objects.all().filter(location__id__in=lids)
+    return Sighting.objects.all()
 
 
 def sightings_filter_sort(

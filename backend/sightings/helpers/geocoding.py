@@ -219,6 +219,19 @@ def create_and_validate_location(
 
     return nl
 
+
+def locations_distance_within_q(
+    locations: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    ids = []
+    for location in locations:
+        dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters
+        if dist <= arc_length:
+            ids.append(location.id)
+
+    return Q(id__in=ids)
+
+
 def find_locations_by_distance_within(
     locations: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
@@ -230,13 +243,22 @@ def find_locations_by_distance_within(
     :param arc_length:
     :return:
     """
+    query = locations_distance_within_q(
+        locations, latitude, longitude, arc_length
+    )
+    return locations.filter(query)
+
+
+def locations_distance_outside_q(
+    locations: QuerySet, latitude: float, longitude: float, arc_length: float
+):
     ids = []
     for location in locations:
         dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters
-        if dist <= arc_length:
+        if dist > arc_length:
             ids.append(location.id)
 
-    return Location.objects.all().filter(id__in=ids)
+    return Q(id__in=ids)
 
 
 def find_locations_by_distance_outside(
@@ -250,13 +272,10 @@ def find_locations_by_distance_outside(
     :param arc_length: distance in meters
     :return:
     """
-    ids = []
-    for location in locations:
-        dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters
-        if dist > arc_length:
-            ids.append(location.id)
-
-    return Location.objects.all().filter(id__in=ids)
+    query = locations_distance_within_q(
+        locations, latitude, longitude, arc_length,
+    )
+    return locations.filter(query)
 
 
 def find_sightings_by_distance_within(

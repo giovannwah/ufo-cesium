@@ -2,7 +2,6 @@ from typing import Optional
 from strawberry import auto
 from strawberry_django_plus import gql
 from sightings.models import Location
-from sightings.exceptions import LocationInputValidationException
 
 
 NORTHERN = 'northern'
@@ -65,15 +64,6 @@ class LocationFilterInput:
     country_exact: Optional[str] = None
     distance_from: Optional[DistanceFromInput] = None
     q: Optional[str] = None
-
-    def validate(self) -> bool:
-        """
-        Validate LocationFilterInput
-        """
-        if self.state_exact and self.state_name_exact:
-            raise LocationInputValidationException('Cannot specify both stateExact and stateNameExact')
-
-        return True
 
 
 @gql.django.type(Location)
