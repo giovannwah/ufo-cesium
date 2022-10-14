@@ -29,6 +29,10 @@ class Query:
         :param location_filter: LocationFilterInput object
         :param sort: SortInput object
         """
+        # validate location filter input
+        if location_filter:
+            location_filter.validate()
+
         return locations_filter_sort(
             location_filter=location_filter,
             sort=sort

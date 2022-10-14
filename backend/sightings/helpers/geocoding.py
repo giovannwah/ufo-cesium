@@ -7,8 +7,12 @@ from geopy.geocoders import (
     GeocoderNotFound,
 )
 from geopy import distance
-from sightings.exceptions import LocationValidationException
-from sightings.models import Location
+from sightings.exceptions import LocationInputValidationException
+from sightings.models import (
+    Location,
+    Sighting,
+)
+
 
 STATE_MAP = {
     "AL": "Alabama",
@@ -137,7 +141,7 @@ def verify_location_coordinates(
 
     if not validate_longitude_latitude(longitude=longitude, latitude=latitude):
         msg = f'Invalid latitude, longitude: ({query})'
-        raise LocationValidationException(msg)
+        raise LocationInputValidationException(msg)
 
     if country is None and state is None and city is None:
         return True
@@ -215,12 +219,11 @@ def create_and_validate_location(
 
     return nl
 
-
 def find_locations_by_distance_within(
     locations: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
     """
-    Return all locations within a given distance from a point
+    Return all locations within a given distance in meters from a point
     :param locations:
     :param latitude:
     :param longitude:
@@ -240,11 +243,11 @@ def find_locations_by_distance_outside(
     locations: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
     """
-    Return all locations outside of a given distance from a certain point
+    Return all locations outside a given distance in meters from a certain point
     :param locations:
     :param latitude:
     :param longitude:
-    :param arc_length:
+    :param arc_length: distance in meters
     :return:
     """
     ids = []
@@ -254,3 +257,46 @@ def find_locations_by_distance_outside(
             ids.append(location.id)
 
     return Location.objects.all().filter(id__in=ids)
+
+
+def find_sightings_by_distance_within(
+    sightings: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    """
+    Return all sightings within a given distance in meters from a point
+    :param sightings:
+    :param latitude:
+    :param longitude:
+    :param arc_length: distance in meters
+    :return:
+    """
+    ids = []
+    for sighting in sightings:
+        dist = distance.distance(
+            (sighting.location.latitude, sighting.location.longitude), (latitude, longitude)
+        ).meters
+        if dist <= arc_length:
+            ids.append(sighting.id)
+
+    return Sighting.objects.all().filter(id__in=ids)
+
+
+def find_sightings_by_distance_outside(
+    sightings: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    """
+    Return all sightings outside a given distance in meters from a point
+    :param sightings:
+    :param latitude:
+    :param longitude:
+    :param arc_length: distance in meters
+    """
+    ids = []
+    for sighting in sightings:
+        dist = distance.distance(
+            (sighting.location.latitude, sighting.location.longitude), (latitude, longitude)
+        ).meters
+        if dist > arc_length:
+            ids.append(sighting.id)
+
+    return Sighting.objects.all().filter(id__in=ids)

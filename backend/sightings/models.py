@@ -152,7 +152,9 @@ class Sighting(models.Model):
 
 class Post(models.Model):
     """
-    Model representing a particular post made by a user
+    Model representing a particular post of a ufo sighting made by a user. This is distinguished from a
+    Sighting in that a Sighting represents a particular event observed (potentially) in mass at a particular
+    place and time, while a Post represents an individual's (potentially faulty) interpretation of a Sighting.
     """
     class Shape(models.TextChoices):
         CHANGING = 'changing'

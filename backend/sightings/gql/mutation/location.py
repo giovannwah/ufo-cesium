@@ -5,7 +5,7 @@ from sightings.gql.types.location import (
     LocationType,
 )
 from sightings.helpers.locations import create_location
-from sightings.exceptions import LocationValidationException
+from sightings.exceptions import LocationInputValidationException
 
 
 @gql.type
@@ -37,4 +37,4 @@ class Mutation:
             return location_type
         else:
             msg = f'Could not validate coordinates ({latitude}, {longitude})'
-            raise LocationValidationException(msg)
+            raise LocationInputValidationException(msg)
