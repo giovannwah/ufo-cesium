@@ -9,6 +9,7 @@ from sightings.helpers.geocoding import (
     verify_location_coordinates,
     create_and_validate_location,
 )
+from sightings.helpers.common import generate_search_query
 
 
 def locations_q_by_state_exact(state_exact: str):
@@ -59,12 +60,7 @@ def locations_q_by_search_query(q: str):
     :param q: query string, space separated
     :return: django Q object
     """
-    query_terms = list(map(contains_query, q.split(' ')))
-    query = Q()
-    for term in query_terms:
-        query &= term
-
-    return query
+    return generate_search_query(q, contains_query)
 
 
 def create_location(location_input: dict) -> Optional[LocationType]:

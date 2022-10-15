@@ -13,7 +13,8 @@ class SightingFilterInput:
     GQL input type for filtering Sightings
     """
     location_filter: Optional[LocationFilterInput] = None
-    datetime_filter: Optional[DateTimeFilterInput] = None
+    sighting_datetime_filter: Optional[DateTimeFilterInput] = None
+    created_datetime_filter: Optional[DateTimeFilterInput] = None
     location_ids: Optional[str] = None  # filter by a list of location global ids
 
     def validate(self) -> bool:

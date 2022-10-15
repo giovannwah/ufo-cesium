@@ -4,6 +4,7 @@ from sightings.gql.types.sighting import SightingNode
 from sightings.gql.types.sighting import SightingFilterInput
 from sightings.gql.types.sorting import SortInput
 from sightings.helpers.sighting import sightings_filter_sort
+from sightings.filters.validate import validate_filters
 
 
 @gql.type
@@ -25,11 +26,3 @@ class Query:
         :param sighting_filter: SightingFilterInput object
         :param sort: SortInput object
         """
-        # validate sighting filter input
-        if sighting_filter:
-            sighting_filter.validate()
-
-        return sightings_filter_sort(
-            sighting_filter=sighting_filter,
-            sort=sort
-        )

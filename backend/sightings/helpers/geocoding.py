@@ -278,6 +278,21 @@ def find_locations_by_distance_outside(
     return locations.filter(query)
 
 
+def sightings_distance_within_q(
+    sightings: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    ids = []
+    for sighting in sightings:
+        dist = distance.distance(
+            (sighting.location.latitude, sighting.location.longitude),
+            (latitude, longitude)
+        ).meters
+        if dist <= arc_length:
+            ids.append(sighting.location.id)
+
+    return Q(id__in=ids)
+
+
 def find_sightings_by_distance_within(
     sightings: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
@@ -289,15 +304,25 @@ def find_sightings_by_distance_within(
     :param arc_length: distance in meters
     :return:
     """
+    query = sightings_distance_within_q(
+        sightings, latitude, longitude, arc_length,
+    )
+    return sightings.filter(query)
+
+
+def sightings_distance_outside_q(
+    sightings: QuerySet, latitude: float, longitude: float, arc_length: float
+):
     ids = []
     for sighting in sightings:
         dist = distance.distance(
-            (sighting.location.latitude, sighting.location.longitude), (latitude, longitude)
+            (sighting.location.latitude, sighting.location.longitude),
+            (latitude, longitude)
         ).meters
-        if dist <= arc_length:
-            ids.append(sighting.id)
+        if dist > arc_length:
+            ids.append(sighting.location.id)
 
-    return Sighting.objects.all().filter(id__in=ids)
+    return Q(id__in=ids)
 
 
 def find_sightings_by_distance_outside(
@@ -310,12 +335,7 @@ def find_sightings_by_distance_outside(
     :param longitude:
     :param arc_length: distance in meters
     """
-    ids = []
-    for sighting in sightings:
-        dist = distance.distance(
-            (sighting.location.latitude, sighting.location.longitude), (latitude, longitude)
-        ).meters
-        if dist > arc_length:
-            ids.append(sighting.id)
-
-    return Sighting.objects.all().filter(id__in=ids)
+    query = sightings_distance_outside_q(
+        sightings, latitude, longitude, arc_length,
+    )
+    return sightings.filter(query)
