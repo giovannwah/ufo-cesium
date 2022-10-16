@@ -8,7 +8,8 @@ from sightings.helpers.common import get_order_by_field
 from sightings.gql.types.sorting import SortInput
 from sightings.models import Location
 from sightings.filters.resolvers.and_resolver import AndResolver
-from sightings.filters.validate import validate_filters, get_location_filters
+from sightings.filters.validate import validate_filters
+from sightings.filters.locations import get_location_filters
 
 
 @gql.type

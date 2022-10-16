@@ -16,6 +16,7 @@ from sightings.helpers.locations import (
     locations_q_by_state_exact,
     locations_q_by_city_exact,
 )
+from sightings.gql.types.location import LocationFilterInput
 
 
 class DistanceFromFilter(BaseFilter):
@@ -150,3 +151,31 @@ class LocationExactFilter(BaseFilter):
             return query_set
 
         return query_set.filter(self.get_query())
+
+
+def get_location_filters(linput: LocationFilterInput):
+    ret = []
+    if linput.city_exact or linput.state_exact or linput.country_exact or linput.state_name_exact:
+        ret.append(
+            LocationExactFilter(
+                city_exact=linput.city_exact,
+                state_exact=linput.state_exact,
+                state_name_exact=linput.state_name_exact,
+                country_exact=linput.country_exact,
+            )
+        )
+    if linput.q:
+        ret.append(
+            LocationQueryStringFilter(q=linput.q)
+        )
+    if linput.distance_from:
+        ret.append(
+            DistanceFromFilter(
+                longitude=linput.distance_from.longitude,
+                latitude=linput.distance_from.latitude,
+                arc_length=linput.distance_from.arc_length,
+                inside_circle=linput.distance_from.inside_circle
+            )
+        )
+
+    return ret

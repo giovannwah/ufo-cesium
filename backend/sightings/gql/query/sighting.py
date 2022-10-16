@@ -7,8 +7,8 @@ from sightings.gql.types.sighting import SightingFilterInput
 from sightings.gql.types.sorting import SortInput
 from sightings.filters.validate import (
     validate_filters,
-    get_sighting_filters,
 )
+from sightings.filters.sightings import get_sighting_filters
 from sightings.filters.resolvers.and_resolver import AndResolver
 
 

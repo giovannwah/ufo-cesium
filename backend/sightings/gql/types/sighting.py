@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from strawberry import auto
 from strawberry_django_plus import gql
 from sightings.models import Sighting
@@ -12,8 +12,8 @@ class SightingFilterInput:
     GQL input type for filtering Sightings
     """
     location_filter: Optional[LocationFilterInput] = None
+    location_ids: Optional[List[str]] = None  # filter by a list of location global ids
     sighting_datetime_filter: Optional[DateTimeFilterInput] = None
-    location_ids: Optional[str] = None  # filter by a list of location global ids
 
 
 @gql.django.type(Sighting)

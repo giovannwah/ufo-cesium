@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from datetime import date, time
 from django.db.models import QuerySet
 from django.db.models.query import Q
@@ -26,6 +26,7 @@ from sightings.helpers.sighting import (
     sightings_q_by_time_after,
     sightings_q_by_time_before,
 )
+from sightings.gql.types.sighting import SightingFilterInput
 
 
 class SightingsDistanceFromFilter(BaseFilter):
@@ -148,6 +149,23 @@ class SightingsLocationExactFilter(BaseFilter):
         return query_set.filter(self.get_query())
 
 
+class SightingsLocationIds(BaseFilter):
+    def __init__(self, location_ids: List[str]):
+        self.location_ids = location_ids
+
+    def validate(self) -> bool:
+        return True
+
+    def get_query(self) -> Q:
+        return Q(location__id__in=self.location_ids)
+
+    def filter_qs(self, query_set: QuerySet[Sighting]) -> QuerySet[Sighting]:
+        if not query_set.exists():
+            return query_set
+
+        return query_set.filter(self.get_query())
+
+
 class SightingsDateFilter(BaseFilter):
     def __init__(
         self,
@@ -236,3 +254,66 @@ class SightingsTimeFilter(BaseFilter):
             return query_set
 
         return query_set.filter(self.get_query())
+
+
+def get_sighting_filters(sfi: SightingFilterInput):
+    ret = []
+    loc_input = sfi.location_filter if sfi else None
+    sdt_input = sfi.sighting_datetime_filter if sfi else None
+    loc_ids = sfi.location_ids if sfi else None
+
+    if loc_input:
+        if loc_input.city_exact or loc_input.state_exact or loc_input.country_exact or loc_input.state_name_exact:
+            ret.append(
+                SightingsLocationExactFilter(
+                    city_exact=loc_input.city_exact,
+                    state_exact=loc_input.state_exact,
+                    state_name_exact=loc_input.state_name_exact,
+                    country_exact=loc_input.country_exact
+                )
+            )
+
+        if loc_input.q:
+            ret.append(
+                SightingsLocationQueryStringFilter(
+                    q=loc_input.q
+                )
+            )
+
+        if loc_input.distance_from:
+            ret.append(
+                SightingsDistanceFromFilter(
+                    longitude=loc_input.distance_from.longitude,
+                    latitude=loc_input.distance_from.latitude,
+                    arc_length=loc_input.distance_from.arc_length,
+                    inside_circle=loc_input.distance_from.inside_circle,
+                )
+            )
+
+    if sdt_input:
+        if sdt_input.date_before or sdt_input.date_after or sdt_input.date_exact:
+            ret.append(
+                SightingsDateFilter(
+                    date_after=sdt_input.date_after,
+                    date_before=sdt_input.date_before,
+                    date_exact=sdt_input.date_exact,
+                )
+            )
+
+        if sdt_input.time_before or sdt_input.time_after or sdt_input.time_exact:
+            ret.append(
+                SightingsTimeFilter(
+                    time_after=sdt_input.time_after,
+                    time_before=sdt_input.time_before,
+                    time_exact=sdt_input.time_exact,
+                )
+            )
+
+    if loc_ids:
+        ret.append(
+            SightingsLocationIds(
+                location_ids=loc_ids
+            )
+        )
+
+    return ret
