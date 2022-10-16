@@ -288,7 +288,7 @@ def sightings_distance_within_q(
             (latitude, longitude)
         ).meters
         if dist <= arc_length:
-            ids.append(sighting.location.id)
+            ids.append(sighting.id)
 
     return Q(id__in=ids)
 
@@ -320,7 +320,7 @@ def sightings_distance_outside_q(
             (latitude, longitude)
         ).meters
         if dist > arc_length:
-            ids.append(sighting.location.id)
+            ids.append(sighting.id)
 
     return Q(id__in=ids)
 
