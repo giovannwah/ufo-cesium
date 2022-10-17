@@ -68,6 +68,23 @@ STATE_MAP = {
 }
 
 
+def distance_to_degrees(meters: float) -> float:
+    if meters > 100000:
+        msg = f"meters argument must be less than 100000. meters = {meters}"
+        raise ValueError(msg)
+
+    if 100000 >= meters > 10000:
+        return 1.0
+    elif 10000 >= meters > 1000:
+        return 0.1
+    elif 1000 >= meters > 100:
+        return 0.01
+    elif 100 >= meters > 10:
+        return 0.001
+
+    return 0.0001
+
+
 def generate_geocoder_config_for_service(service: str) -> Optional[dict]:
     """
     Return service config for a given geocoding service
@@ -154,16 +171,22 @@ def verify_location_coordinates(
     )
 
 
-def generate_lat_lon_nearby_query(latitude: float, longitude: float, precision: float):
+def generate_lat_lon_nearby_query(
+        latitude: float, longitude: float, precision: float, sightings: bool = False
+):
     """
     Generate a simple location-based query given the precision error value
     """
-    return Q(
-        latitude__lt=latitude + precision,
-        latitude__gt=latitude - precision,
-        longitude__lt=longitude + precision,
-        longitude__gt=longitude - precision,
-    )
+    args = {
+        "latitude__lt": latitude + precision,
+        "latitude__gt": latitude - precision,
+        "longitude__lt": longitude + precision,
+        "longitude__gt": longitude - precision,
+    }
+    if sightings:
+        args = {f"location__{k}": v for (k, v) in args.items()}
+
+    return Q(**args)
 
 
 def find_closest_location(locations: QuerySet, latitude: float, longitude: float):
@@ -223,6 +246,14 @@ def create_and_validate_location(
 def locations_distance_within_q(
     locations: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
+    precision = distance_to_degrees(arc_length)
+    locations = locations.filter(
+        generate_lat_lon_nearby_query(
+            latitude=latitude,
+            longitude=longitude,
+            precision=precision,
+        )
+    )
     ids = []
     for location in locations:
         dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters
@@ -252,6 +283,14 @@ def find_locations_by_distance_within(
 def locations_distance_outside_q(
     locations: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
+    precision = distance_to_degrees(arc_length)
+    locations = locations.filter(
+        generate_lat_lon_nearby_query(
+            latitude=latitude,
+            longitude=longitude,
+            precision=precision,
+        )
+    )
     ids = []
     for location in locations:
         dist = distance.distance((location.latitude, location.longitude), (latitude, longitude)).meters
@@ -281,6 +320,15 @@ def find_locations_by_distance_outside(
 def sightings_distance_within_q(
     sightings: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
+    precision = distance_to_degrees(arc_length)
+    sightings = sightings.filter(
+        generate_lat_lon_nearby_query(
+            latitude=latitude,
+            longitude=longitude,
+            precision=precision,
+            sightings=True
+        )
+    )
     ids = []
     for sighting in sightings:
         dist = distance.distance(
@@ -288,9 +336,9 @@ def sightings_distance_within_q(
             (latitude, longitude)
         ).meters
         if dist <= arc_length:
-            ids.append(sighting.id)
+            ids.append(sighting.location.id)
 
-    return Q(id__in=ids)
+    return Q(location__id__in=ids)
 
 
 def find_sightings_by_distance_within(
@@ -313,6 +361,15 @@ def find_sightings_by_distance_within(
 def sightings_distance_outside_q(
     sightings: QuerySet, latitude: float, longitude: float, arc_length: float
 ):
+    precision = distance_to_degrees(arc_length)
+    sightings = sightings.filter(
+        generate_lat_lon_nearby_query(
+            latitude=latitude,
+            longitude=longitude,
+            precision=precision,
+            sightings=True
+        )
+    )
     ids = []
     for sighting in sightings:
         dist = distance.distance(
@@ -320,9 +377,9 @@ def sightings_distance_outside_q(
             (latitude, longitude)
         ).meters
         if dist > arc_length:
-            ids.append(sighting.id)
+            ids.append(sighting.location.id)
 
-    return Q(id__in=ids)
+    return Q(location__id__in=ids)
 
 
 def find_sightings_by_distance_outside(
