@@ -1,4 +1,5 @@
 from typing import Optional, List
+from strawberry_django_plus.relay import from_base64
 from datetime import date, time
 from django.db.models import QuerySet
 from django.db.models.query import Q
@@ -157,7 +158,8 @@ class SightingsLocationIds(BaseFilter):
         return True
 
     def get_query(self) -> Q:
-        return Q(location__id__in=self.location_ids)
+        # assuming location_ids are relay global ids
+        return Q(location__id__in=[from_base64(loc)[1] for loc in self.location_ids])
 
     def filter_qs(self, query_set: QuerySet[Sighting]) -> QuerySet[Sighting]:
         if not query_set.exists():

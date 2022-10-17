@@ -12,6 +12,7 @@ from sightings.models import (
     Location,
     Sighting,
 )
+from sightings.helpers.common import update_filter_args
 
 
 STATE_MAP = {
@@ -172,19 +173,21 @@ def verify_location_coordinates(
 
 
 def generate_lat_lon_nearby_query(
-        latitude: float, longitude: float, precision: float, sightings: bool = False
+        latitude: float, longitude: float, precision: float, sightings: bool = False, posts: bool = False
 ):
     """
     Generate a simple location-based query given the precision error value
     """
-    args = {
-        "latitude__lt": latitude + precision,
-        "latitude__gt": latitude - precision,
-        "longitude__lt": longitude + precision,
-        "longitude__gt": longitude - precision,
-    }
-    if sightings:
-        args = {f"location__{k}": v for (k, v) in args.items()}
+    args = update_filter_args(
+        args={
+            "latitude__lt": latitude + precision,
+            "latitude__gt": latitude - precision,
+            "longitude__lt": longitude + precision,
+            "longitude__gt": longitude - precision,
+        },
+        sightings=sightings,
+        posts=posts,
+    )
 
     return Q(**args)
 

@@ -9,39 +9,114 @@ from sightings.helpers.geocoding import (
     verify_location_coordinates,
     create_and_validate_location,
 )
-from sightings.helpers.common import generate_search_query
+from sightings.helpers.common import (
+    generate_search_query,
+    update_filter_args,
+)
 
 
-def locations_q_by_state_exact(state_exact: str):
-    return Q(state__iexact=state_exact) if state_exact else Q()
+def locations_q_by_state_exact(state_exact: str, sightings=False, posts=False):
+    if not state_exact:
+        return Q()
+
+    args = update_filter_args(
+        {"state__iexact": state_exact},
+        sightings=sightings,
+        posts=posts,
+    )
+
+    return Q(**args)
 
 
-def locations_q_by_state_name_exact(state_name_exact: str):
-    return Q(state_name__iexact=state_name_exact) if state_name_exact else Q()
+def locations_q_by_state_name_exact(state_name_exact: str, sightings=False, posts=False):
+    if not state_name_exact:
+        return Q()
+
+    args = update_filter_args(
+        {"state_name__iexact": state_name_exact},
+        sightings=sightings,
+        posts=posts,
+    )
+
+    return Q(**args)
 
 
-def locations_q_by_city_exact(city_exact: str):
-    return Q(city__iexact=city_exact) if city_exact else Q()
+def locations_q_by_city_exact(city_exact: str, sightings=False, posts=False):
+    if not city_exact:
+        return Q()
+
+    args = update_filter_args(
+        {"city__iexact": city_exact},
+        sightings=sightings,
+        posts=posts,
+    )
+
+    return Q(**args)
 
 
-def locations_q_by_country_exact(country_exact: str):
-    return Q(country__iexact=country_exact) if country_exact else Q()
+def locations_q_by_country_exact(country_exact: str, sightings=False, posts=False):
+    if not country_exact:
+        return Q()
+
+    args = update_filter_args(
+        {"country__iexact": country_exact},
+        sightings=sightings,
+        posts=posts,
+    )
+
+    return Q(**args)
 
 
-def locations_q_by_state_contains(state_contains: str):
-    return Q(state__icontains=state_contains) if state_contains else Q()
+def locations_q_by_state_contains(state_contains: str, sightings=False, posts=False):
+    if not state_contains:
+        return Q()
+
+    args = update_filter_args(
+        {"state__icontains": state_contains},
+        sightings=sightings,
+        posts=posts,
+    )
+
+    return Q(**args)
 
 
-def locations_q_by_city_contains(city_contains: str):
-    return Q(city__icontains=city_contains) if city_contains else Q()
+def locations_q_by_city_contains(city_contains: str, sightings=False, posts=False):
+    if not city_contains:
+        return Q()
+
+    args = update_filter_args(
+        {"city__icontains": city_contains},
+        sightings=sightings,
+        posts=posts,
+    )
+
+    return Q(**args)
 
 
-def locations_q_by_country_contains(country_contains: str):
-    return Q(country__icontains=country_contains) if country_contains else Q()
+def locations_q_by_country_contains(country_contains: str, sightings=False, posts=False):
+    if not country_contains:
+        return Q()
+
+    args = update_filter_args(
+        {"country__icontains": country_contains},
+        sightings=sightings,
+        posts=posts,
+    )
+
+    return Q(**args)
 
 
-def locations_q_by_state_name_contains(state_name_contains: str):
-    return Q(state_name__icontains=state_name_contains) if state_name_contains else Q()
+def locations_q_by_state_name_contains(state_name_contains: str, sightings=False, posts=False):
+    if not state_name_contains:
+        return Q()
+
+    args = update_filter_args(
+        {"state_name__icontains": state_name_contains},
+        sightings=sightings,
+        posts=posts,
+    )
+
+    return Q(**args)
 
 
 def contains_query(q: str):

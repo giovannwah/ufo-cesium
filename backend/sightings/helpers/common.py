@@ -21,3 +21,16 @@ def generate_search_query(q: str, callback: Callable):
         query &= term
 
     return query
+
+
+def update_filter_args(args: dict, sightings: bool = False, posts: bool = False):
+    """
+    Updates filter args for usage against Sightings and Posts models
+    """
+    if not sightings and not posts:
+        return args
+
+    if sightings:
+        return {f"location__{k}": v for (k, v) in args.items()}
+    else:
+        return {f"sighting__location__{k}": v for (k, v) in args.items()}
