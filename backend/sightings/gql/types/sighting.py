@@ -11,9 +11,10 @@ class SightingFilterInput:
     """
     GQL input type for filtering Sightings
     """
+    sighting_datetime_filter: Optional[DateTimeFilterInput] = None
     location_filter: Optional[LocationFilterInput] = None
     location_ids: Optional[List[str]] = None  # filter by a list of location global ids
-    sighting_datetime_filter: Optional[DateTimeFilterInput] = None
+    sighting_ids: Optional[List[str]] = None  # filter by a list of sighting global ids
 
 
 @gql.django.type(Sighting)

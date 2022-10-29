@@ -1,13 +1,12 @@
 from typing import Optional
 from django.db.models import QuerySet
 from django.db.models.query import Q
-from sightings.filters.base import BaseFilter
+from sightings.filters.base import BaseFilter, SimpleFilter
 from sightings.exceptions import LocationInputValidationException
-from sightings.models import Location
 from sightings.helpers.geocoding import (
     validate_longitude_latitude,
-    locations_distance_within_q,
-    locations_distance_outside_q,
+    generic_distance_outside_q,
+    generic_distance_within_q,
 )
 from sightings.helpers.locations import (
     locations_q_by_search_query,
@@ -16,6 +15,7 @@ from sightings.helpers.locations import (
     locations_q_by_state_exact,
     locations_q_by_city_exact,
 )
+from sightings.helpers.common import update_filter_args
 from sightings.gql.types.location import LocationFilterInput
 
 
@@ -33,7 +33,7 @@ class DistanceFromFilter(BaseFilter):
         longitude: float,
         latitude: float,
         arc_length: float,
-        inside_circle: bool
+        inside_circle: bool,
     ):
         self.longitude = longitude
         self.latitude = latitude
@@ -53,41 +53,37 @@ class DistanceFromFilter(BaseFilter):
         return True
 
     def get_query(
-        self, locations: QuerySet[Location], latitude: float, longitude: float, arc_length: float
+        self, qs: QuerySet, latitude: float, longitude: float, arc_length: float
     ) -> Q:
         if self.inside_circle:
-            return locations_distance_within_q(
-                locations, self.latitude, self.longitude, self.arc_length
+            return generic_distance_within_q(
+                qs, self.latitude, self.longitude, self.arc_length
             )
         else:
-            return locations_distance_outside_q(
-                locations, self.latitude, self.longitude, self.arc_length
+            return generic_distance_outside_q(
+                qs, self.latitude, self.longitude, self.arc_length
             )
 
-    def filter_qs(self, query_set: QuerySet[Location]) -> QuerySet[Location]:
+    def filter_qs(self, query_set: QuerySet) -> QuerySet:
         if not query_set.exists():
             return query_set
 
-        return query_set.filter(self.get_query(
-            locations=query_set,
-            latitude=self.latitude,
-            longitude=self.longitude,
-            arc_length=self.arc_length,
-        ))
+        return query_set.filter(
+            self.get_query(
+                qs=query_set,
+                latitude=self.latitude,
+                longitude=self.longitude,
+                arc_length=self.arc_length,
+            )
+        )
 
 
-class LocationQueryStringFilter(BaseFilter):
+class LocationQueryStringFilter(SimpleFilter):
     """
     Filter for a location query string
     """
     def __init__(self, q: Optional[str] = None):
         self.q = q
-
-    def validate(self) -> bool:
-        """
-        Validate LocationFilterInput
-        """
-        return True
 
     def get_query(self) -> Q:
         if self.q is None or self.q.strip() == "":
@@ -95,14 +91,8 @@ class LocationQueryStringFilter(BaseFilter):
 
         return locations_q_by_search_query(self.q)
 
-    def filter_qs(self, query_set: QuerySet[Location]) -> QuerySet[Location]:
-        if not query_set.exists():
-            return query_set
 
-        return query_set.filter(self.get_query())
-
-
-class LocationExactFilter(BaseFilter):
+class LocationExactFilter(SimpleFilter):
     """
     Filter for Exact location
     """
@@ -111,7 +101,7 @@ class LocationExactFilter(BaseFilter):
         city_exact: Optional[str] = None,
         state_exact: Optional[str] = None,
         state_name_exact: Optional[str] = None,
-        country_exact: Optional[str] = None
+        country_exact: Optional[str] = None,
     ):
         self.city_exact = city_exact
         self.state_exact = state_exact
@@ -127,7 +117,7 @@ class LocationExactFilter(BaseFilter):
 
         return True
 
-    def get_query(self) -> Q:
+    def get_query(self, query_set: QuerySet) -> Q:
         query = Q()
 
         if all(i is None or i.strip() == "" for i in
@@ -145,12 +135,6 @@ class LocationExactFilter(BaseFilter):
             query &= locations_q_by_city_exact(self.city_exact)
 
         return query
-
-    def filter_qs(self, query_set: QuerySet[Location]) -> QuerySet[Location]:
-        if not query_set.exists():
-            return query_set
-
-        return query_set.filter(self.get_query())
 
 
 def get_location_filters(linput: LocationFilterInput):

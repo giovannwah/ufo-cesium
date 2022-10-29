@@ -11,6 +11,7 @@ from sightings.exceptions import LocationInputValidationException
 from sightings.models import (
     Location,
     Sighting,
+    Post
 )
 from sightings.helpers.common import update_filter_args
 
@@ -399,3 +400,93 @@ def find_sightings_by_distance_outside(
         sightings, latitude, longitude, arc_length,
     )
     return sightings.filter(query)
+
+
+def posts_distance_within_q(
+    posts: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    precision = distance_to_degrees(arc_length)
+    posts = posts.filter(
+        generate_lat_lon_nearby_query(
+            latitude=latitude,
+            longitude=longitude,
+            precision=precision,
+            posts=True
+        )
+    )
+    ids = []
+    for post in posts:
+        dist = distance.distance(
+            (post.sighting.location.latitude, post.sighting.location.longitude),
+            (latitude, longitude)
+        ).meters
+        if dist <= arc_length:
+            ids.append(post.sighting.location.id)
+
+    return Q(sighting__location__id__in=ids)
+
+
+def posts_distance_outside_q(
+    posts: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    precision = distance_to_degrees(arc_length)
+    posts = posts.filter(
+        generate_lat_lon_nearby_query(
+            latitude=latitude,
+            longitude=longitude,
+            precision=precision,
+            posts=True
+        )
+    )
+    ids = []
+    for post in posts:
+        dist = distance.distance(
+            (post.sighting.location.latitude, post.sighting.location.longitude),
+            (latitude, longitude)
+        ).meters
+        if dist > arc_length:
+            ids.append(post.sighting.location.id)
+
+    return Q(sighting__location__id__in=ids)
+
+
+def generic_distance_outside_q(
+    qs: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    if qs.model is Location:
+        return locations_distance_outside_q(
+            locations=qs, latitude=latitude, longitude=longitude, arc_length=arc_length
+        )
+
+    elif qs.model is Sighting:
+        return sightings_distance_outside_q(
+            sightings=qs, latitude=latitude, longitude=longitude, arc_length=arc_length
+        )
+
+    elif qs.model is Post:
+        return posts_distance_outside_q(
+            posts=qs, latitude=latitude, longitude=longitude, arc_length=arc_length
+        )
+
+    return Q()
+
+
+def generic_distance_within_q(
+    qs: QuerySet, latitude: float, longitude: float, arc_length: float
+):
+    if qs.model is Location:
+        return locations_distance_within_q(
+            locations=qs, latitude=latitude, longitude=longitude, arc_length=arc_length
+        )
+
+    elif qs.model is Sighting:
+        return sightings_distance_within_q(
+            sightings=qs, latitude=latitude, longitude=longitude, arc_length=arc_length
+        )
+
+    elif qs.model is Post:
+        return posts_distance_within_q(
+            posts=qs, latitude=latitude, longitude=longitude, arc_length=arc_length
+        )
+
+    return Q()

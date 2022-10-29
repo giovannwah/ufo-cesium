@@ -2,39 +2,39 @@ from typing import Optional
 from strawberry import auto
 from strawberry_django_plus import gql
 from sightings.models import Location
-
-
-NORTHERN = 'northern'
-SOUTHERN = 'southern'
-EASTERN = 'eastern'
-WESTERN = 'western'
-
-HEMISPHERES = {
-    NORTHERN: {
-        "longitude": 0,
-        "latitude": 90,
-        "arc_length": 10001965.729,
-        "inside_circle": True,
-    },
-    SOUTHERN: {
-        "longitude": 0,
-        "latitude": 90,
-        "arc_length": 10001965.729,
-        "inside_circle": False,
-    },
-    EASTERN: {
-        "longitude": 90,
-        "latitude": 0,
-        "arc_length": 10018754.25,
-        "inside_circle": True,
-    },
-    WESTERN: {
-        "longitude": 90,
-        "latitude": 0,
-        "arc_length": 10018754.25,
-        "inside_circle": False,
-    },
-}
+#
+#
+# NORTHERN = 'northern'
+# SOUTHERN = 'southern'
+# EASTERN = 'eastern'
+# WESTERN = 'western'
+#
+# HEMISPHERES = {
+#     NORTHERN: {
+#         "longitude": 0,
+#         "latitude": 90,
+#         "arc_length": 10001965.729,
+#         "inside_circle": True,
+#     },
+#     SOUTHERN: {
+#         "longitude": 0,
+#         "latitude": 90,
+#         "arc_length": 10001965.729,
+#         "inside_circle": False,
+#     },
+#     EASTERN: {
+#         "longitude": 90,
+#         "latitude": 0,
+#         "arc_length": 10018754.25,
+#         "inside_circle": True,
+#     },
+#     WESTERN: {
+#         "longitude": 90,
+#         "latitude": 0,
+#         "arc_length": 10018754.25,
+#         "inside_circle": False,
+#     },
+# }
 
 
 @gql.input

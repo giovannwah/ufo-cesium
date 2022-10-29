@@ -17,3 +17,11 @@ class DatetimeInputValidationException(Exception):
     Raise when validating a datetime input object
     """
     pass
+
+
+class FilterValidationException(Exception):
+    pass
+
+
+class PostInputValidationException(Exception):
+    pass

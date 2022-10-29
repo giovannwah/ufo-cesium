@@ -23,6 +23,10 @@ def generate_search_query(q: str, callback: Callable):
     return query
 
 
+def prepend_to_filter_args(pre: str, args: dict):
+    return {f"{pre}{k}": v for (k, v) in args.items()}
+
+
 def update_filter_args(args: dict, sightings: bool = False, posts: bool = False):
     """
     Updates filter args for usage against Sightings and Posts models
@@ -31,6 +35,6 @@ def update_filter_args(args: dict, sightings: bool = False, posts: bool = False)
         return args
 
     if sightings:
-        return {f"location__{k}": v for (k, v) in args.items()}
-    else:
-        return {f"sighting__location__{k}": v for (k, v) in args.items()}
+        return prepend_to_filter_args("location__", args)
+
+    return prepend_to_filter_args("sighting__location__", args)
