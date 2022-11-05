@@ -8,7 +8,6 @@ from sightings.helpers.common import sort_qs
 from sightings.gql.types.sorting import SortInput
 from sightings.models import Location
 from sightings.filters.resolvers.and_resolver import AndResolver
-from sightings.filters.validate import validate_filters
 from sightings.filters.locations import get_location_filters
 
 
