@@ -1,7 +1,7 @@
 from typing import Optional, Iterable
 from strawberry_django_plus import gql
 from sightings.models import Sighting
-from sightings.helpers.common import get_order_by_field
+from sightings.helpers.common import sort_qs
 from sightings.gql.types.sighting import SightingNode
 from sightings.gql.types.sighting import SightingFilterInput
 from sightings.gql.types.sorting import SortInput
@@ -32,12 +32,11 @@ class Query:
         :param sort: SortInput object
         """
         filters = get_sighting_filters(sfi=sighting_filter)
-        validate_filters(filters)
-
-        sightings = AndResolver().resolve(filters=filters, model=Sighting)
+        resolver = AndResolver(filters=filters)
+        resolver.validate_filters()
+        sightings = resolver.resolve(qs=Sighting.objects.all())
 
         if sort:
-            order = get_order_by_field(sort.order, sort.field)
-            sightings = sightings.order_by(order)
+            sightings = sort_qs(qs=sightings, sort_input=sort)
 
         return sightings

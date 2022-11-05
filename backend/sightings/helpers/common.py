@@ -1,12 +1,16 @@
 from typing import Callable
-from django.db.models.query import Q
-from sightings.gql.types.sorting import SortOrder
+from django.db.models.query import Q, QuerySet
+from sightings.gql.types.sorting import SortOrder, SortInput
 
 
 def get_order_by_field(order: SortOrder, field: str):
     dec = '-' if order == SortOrder.DES else ''
     return f'{dec}{field}'
 
+
+def sort_qs(qs: QuerySet, sort_input: SortInput):
+    order = get_order_by_field(sort_input.order, sort_input.field)
+    return qs.order_by(order)
 
 def generate_search_query(q: str, callback: Callable):
     """

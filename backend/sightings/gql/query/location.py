@@ -4,7 +4,7 @@ from sightings.gql.types.location import (
     LocationNode,
     LocationFilterInput,
 )
-from sightings.helpers.common import get_order_by_field
+from sightings.helpers.common import sort_qs
 from sightings.gql.types.sorting import SortInput
 from sightings.models import Location
 from sightings.filters.resolvers.and_resolver import AndResolver
@@ -32,12 +32,11 @@ class Query:
         :param sort: SortInput object
         """
         filters = get_location_filters(linput=location_filter)
-        validate_filters(filters)
-
-        locations = AndResolver().resolve(filters=filters, model=Location)
+        resolver = AndResolver(filters=filters)
+        resolver.validate_filters()
+        locations = resolver.resolve(qs=Location.objects.all())
 
         if sort:
-            order = get_order_by_field(sort.order, sort.field)
-            locations = locations.order_by(order)
+            locations = sort_qs(qs=locations, sort_input=sort)
 
         return locations

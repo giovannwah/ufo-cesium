@@ -1,5 +1,5 @@
 from typing import Optional
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Model
 from django.db.models.query import Q
 from sightings.filters.base import BaseFilter, SimpleFilter
 from sightings.exceptions import LocationInputValidationException
@@ -10,13 +10,10 @@ from sightings.helpers.geocoding import (
 )
 from sightings.helpers.locations import (
     locations_q_by_search_query,
-    locations_q_by_state_name_exact,
-    locations_q_by_country_exact,
-    locations_q_by_state_exact,
-    locations_q_by_city_exact,
 )
 from sightings.helpers.common import update_filter_args
 from sightings.gql.types.location import LocationFilterInput
+from sightings.models import Sighting, Post
 
 
 class DistanceFromFilter(BaseFilter):
@@ -117,7 +114,7 @@ class LocationExactFilter(SimpleFilter):
 
         return True
 
-    def get_query(self, query_set: QuerySet) -> Q:
+    def get_query(self, model: Model) -> Q:
         query = Q()
 
         if all(i is None or i.strip() == "" for i in
@@ -125,16 +122,43 @@ class LocationExactFilter(SimpleFilter):
         ):
             return query
 
+        state_name_exact_query = {
+            "state_name__iexact": self.state_name_exact
+        }
+        state_exact_query = {
+            "state__iexact": self.state_exact
+        }
+        city_exact_query = {
+            "city__iexact": self.city_exact
+        }
+        country_exact_query = {
+            "country__iexact": self.country_exact
+        }
+
+        if model is Sighting:
+            state_name_exact_query = update_filter_args(state_name_exact_query, sightings=True)
+            state_exact_query = update_filter_args(state_exact_query, sightings=True)
+            city_exact_query = update_filter_args(city_exact_query, sightings=True)
+            country_exact_query = update_filter_args(country_exact_query, sightings=True)
+        if model is Post:
+            state_name_exact_query = update_filter_args(state_name_exact_query, posts=True)
+            state_exact_query = update_filter_args(state_exact_query, posts=True)
+            city_exact_query = update_filter_args(city_exact_query, posts=True)
+            country_exact_query = update_filter_args(country_exact_query, posts=True)
+
         if self.state_name_exact:
-            query &= locations_q_by_state_name_exact(self.state_name_exact)
+            query &= Q(**state_name_exact_query)
         if self.country_exact:
-            query &= locations_q_by_country_exact(self.country_exact)
+            query &= Q(**country_exact_query)
         if self.state_exact:
-            query &= locations_q_by_state_exact(self.state_exact)
+            query &= Q(**state_exact_query)
         if self.city_exact:
-            query &= locations_q_by_city_exact(self.city_exact)
+            query &= Q(**city_exact_query)
 
         return query
+
+    def filter_qs(self, query_set: QuerySet, **kwargs) -> QuerySet:
+        return super.filter_qs(query_set, model=query_set.model)
 
 
 def get_location_filters(linput: LocationFilterInput):

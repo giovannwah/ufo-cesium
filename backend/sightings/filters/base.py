@@ -18,7 +18,7 @@ class BaseFilter:
         """
         raise NotImplementedError
 
-    def filter_qs(self, query_set: QuerySet) -> QuerySet:
+    def filter_qs(self, query_set: QuerySet, **kwargs) -> QuerySet:
         """
         Filter a query_set, returning a filtered version of the input query_set
 
@@ -44,11 +44,11 @@ class SimpleFilter(BaseFilter):
     def validate(self) -> bool:
         return True
 
-    def filter_qs(self, query_set: QuerySet) -> QuerySet:
+    def filter_qs(self, query_set: QuerySet, **kwargs) -> QuerySet:
         if not query_set.exists():
             return query_set
 
-        return query_set.filter(self.get_query())
+        return query_set.filter(self.get_query(**kwargs))
 
 
 class BaseFilterResolver:
@@ -57,7 +57,7 @@ class BaseFilterResolver:
     """
     filters: Iterable[BaseFilter]
 
-    def resolve(self, filters: Iterable[BaseFilter] = None, model: models.Model = None) -> QuerySet:
+    def resolve(self, filters: Iterable[BaseFilter] = None, qs: QuerySet = None) -> QuerySet:
         """
         Resolve an array of filters to produce a query_set on a given model.
         For example:
