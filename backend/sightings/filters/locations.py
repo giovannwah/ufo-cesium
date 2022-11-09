@@ -1,4 +1,5 @@
-from typing import Optional
+from typing import Optional, List
+from strawberry_django_plus.relay import from_base64
 from django.db.models import QuerySet, Model
 from django.db.models.query import Q
 from sightings.filters.base import BaseFilter, SimpleFilter
@@ -158,7 +159,15 @@ class LocationExactFilter(SimpleFilter):
         return query
 
     def filter_qs(self, query_set: QuerySet, **kwargs) -> QuerySet:
-        return super.filter_qs(query_set, model=query_set.model)
+        return super().filter_qs(query_set, model=query_set.model)
+
+
+class LocationIdsFilter(SimpleFilter):
+    def __init__(self, location_ids: List[str]):
+        self.location_ids = location_ids
+
+    def get_query(self):
+        return Q(id__in=[from_base64(loc)[1] for loc in self.location_ids])
 
 
 def get_location_filters(linput: LocationFilterInput):
@@ -183,6 +192,12 @@ def get_location_filters(linput: LocationFilterInput):
                 latitude=linput.distance_from.latitude,
                 arc_length=linput.distance_from.arc_length,
                 inside_circle=linput.distance_from.inside_circle
+            )
+        )
+    if linput.location_ids:
+        ret.append(
+            LocationIdsFilter(
+                location_ids=linput.location_ids
             )
         )
 

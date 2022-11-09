@@ -40,21 +40,21 @@ class DateFilter(SimpleFilter):
     def get_query(self) -> Q:
         year_exact = Q(
             **prepend_to_filter_args(self.pre, {"__year": self.date_exact.year})
-        )
+        ) if self.date_exact else Q()
         month_exact = Q(
             **prepend_to_filter_args(self.pre, {"__month": self.date_exact.month})
-        )
+        ) if self.date_exact else Q()
         day_exact = Q(
             **prepend_to_filter_args(self.pre, {"__day": self.date_exact.day})
-        )
+        ) if self.date_exact else Q()
 
         exact_q = (year_exact & month_exact & day_exact)
         after_q = Q(
             **prepend_to_filter_args(self.pre, {"__gt": self.date_after})
-        )
+        ) if self.date_after else Q()
         before_q = Q(
             **prepend_to_filter_args(self.pre, {"__lt": self.date_before})
-        )
+        ) if self.date_after else Q()
 
         if self.date_exact:
             return exact_q
@@ -98,21 +98,21 @@ class TimeFilter(SimpleFilter):
     def get_query(self) -> Q:
         hour_exact = Q(
             **prepend_to_filter_args(self.pre, {"__hour": self.time_exact.hour})
-        )
+        ) if self.time_exact else Q()
         minute_exact = Q(
             **prepend_to_filter_args(self.pre, {"__minute": self.time_exact.minute})
-        )
+        ) if self.time_exact else Q()
         second_exact = Q(
             **prepend_to_filter_args(self.pre, {"__second": self.time_exact.second})
-        )
+        ) if self.time_exact else Q()
 
         exact_q = (hour_exact & minute_exact & second_exact)
         after_q = Q(
             **prepend_to_filter_args(self.pre, {"__time__gt": self.time_after})
-        )
+        ) if self.time_after else Q()
         before_q = Q(
             **prepend_to_filter_args(self.pre, {"__time__lt": self.time_before})
-        )
+        ) if self.time_before else Q()
 
         if self.time_exact:
             return exact_q

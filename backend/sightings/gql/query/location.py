@@ -32,8 +32,7 @@ class Query:
         """
         filters = get_location_filters(linput=location_filter)
         resolver = AndResolver(filters=filters)
-        resolver.validate_filters()
-        locations = resolver.resolve(qs=Location.objects.all())
+        locations = resolver.validate_and_resolve(qs=Location.objects.all())
 
         if sort:
             locations = sort_qs(qs=locations, sort_input=sort)

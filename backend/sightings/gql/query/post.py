@@ -24,8 +24,7 @@ class Query:
     ) -> Iterable[PostNode]:
         filters = get_post_filters(pfi=post_filter)
         resolver = AndResolver(filters=filters)
-        resolver.validate_filters()
-        posts = resolver.resolve(qs=Post.objects.all())
+        posts = resolver.validate_and_resolve(qs=Post.objects.all())
 
         if sort:
             posts = sort_qs(qs=posts, sort_input=sort)

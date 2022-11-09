@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import List
 from django.db import models
 from django.db.models import Q, QuerySet
 
@@ -55,9 +55,9 @@ class BaseFilterResolver:
     """
     Base filter resolver class
     """
-    filters: Iterable[BaseFilter]
+    filters: List[BaseFilter]
 
-    def resolve(self, filters: Iterable[BaseFilter] = None, qs: QuerySet = None) -> QuerySet:
+    def resolve(self, filters: List[BaseFilter] = None, qs: QuerySet = None) -> QuerySet:
         """
         Resolve an array of filters to produce a query_set on a given model.
         For example:
@@ -74,7 +74,7 @@ class BaseFilterResolver:
         """
         raise NotImplementedError
 
-    def validate_filters(self, filters: Iterable[BaseFilter] = None, model: models.Model = None) -> bool:
+    def validate_filters(self, filters: List[BaseFilter] = None, model: models.Model = None) -> bool:
         """
         Validate all filters in a list of filters to ensure no issues occur while resolving them.
 
@@ -84,7 +84,7 @@ class BaseFilterResolver:
         """
         raise NotImplementedError
 
-    def aggregate_filters(self, filters: Iterable[BaseFilter] = None) -> Iterable[BaseFilter]:
+    def aggregate_filters(self, filters: List[BaseFilter] = None) -> List[BaseFilter]:
         """
         Transform filter values based on some rules.
 

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from strawberry import auto
 from strawberry_django_plus import gql
 from sightings.models import Location
@@ -64,6 +64,7 @@ class LocationFilterInput:
     country_exact: Optional[str] = None
     distance_from: Optional[DistanceFromInput] = None
     q: Optional[str] = None
+    location_ids: Optional[List[str]] = None
 
 
 @gql.django.type(Location)

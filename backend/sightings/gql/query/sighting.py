@@ -30,8 +30,7 @@ class Query:
         """
         filters = get_sighting_filters(sfi=sighting_filter)
         resolver = AndResolver(filters=filters)
-        resolver.validate_filters()
-        sightings = resolver.resolve(qs=Sighting.objects.all())
+        sightings = resolver.validate_and_resolve(qs=Sighting.objects.all())
 
         if sort:
             sightings = sort_qs(qs=sightings, sort_input=sort)

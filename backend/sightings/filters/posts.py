@@ -77,6 +77,7 @@ class PostsUserIdsFilter(SimpleFilter):
 def get_post_filters(pfi: PostFilterInput):
     ret = []
     if pfi:
+        # FIXME: This could all definitely be cleaned up
         shape = getattr(pfi, "ufo_shape", None)
         q = getattr(pfi, "q", None)
         post_created = getattr(pfi, "post_created_datetime", None)
