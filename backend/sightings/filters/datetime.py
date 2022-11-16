@@ -54,7 +54,7 @@ class DateFilter(SimpleFilter):
         ) if self.date_after else Q()
         before_q = Q(
             **prepend_to_filter_args(self.pre, {"__lt": self.date_before})
-        ) if self.date_after else Q()
+        ) if self.date_before else Q()
 
         if self.date_exact:
             return exact_q
