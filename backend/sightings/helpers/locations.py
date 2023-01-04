@@ -1,13 +1,14 @@
 from typing import Optional
 from strawberry_django_plus.relay import to_base64
 from django.db.models import Q
+from sightings.models import Location
 from sightings.gql.types.location import (
     LocationType,
     LocationNode,
 )
 from sightings.helpers.geocoding import (
     verify_location_coordinates,
-    create_and_validate_location,
+    get_or_create_location,
 )
 from sightings.helpers.common import (
     generate_search_query,
@@ -138,7 +139,7 @@ def locations_q_by_search_query(q: str):
     return generate_search_query(q, contains_query)
 
 
-def create_location(location_input: dict) -> Optional[LocationType]:
+def verify_and_create_location(location_input: dict) -> Optional[LocationType]:
     """
     Create a new Location object in the database, and return a LocationType, if input passes validation and
 
@@ -155,8 +156,7 @@ def create_location(location_input: dict) -> Optional[LocationType]:
     """
 
     if verify_location_coordinates(**location_input):
-        location = create_and_validate_location(**location_input)
-        location.save()
+        location = get_or_create_location(**location_input)
         return LocationType(
             id=to_base64(LocationNode.__name__, location.pk),
             latitude=location.latitude,

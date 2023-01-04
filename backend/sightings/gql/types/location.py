@@ -54,6 +54,16 @@ class DistanceFromInput:
 
 
 @gql.input
+class LocationInput:
+    location_id: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+
+
+@gql.input
 class LocationFilterInput:
     """
     Input type for filtering locations

@@ -17,7 +17,10 @@ from sightings.gql.mutation import (
 
 @strawberry.type
 class RootQuery(
-    LocationQuery, SightingQuery, PostQuery, ProfileQuery
+    LocationQuery,
+    SightingQuery,
+    PostQuery,
+    ProfileQuery
 ):
     """
     Root GQL query, inherits from all other queries
@@ -27,7 +30,8 @@ class RootQuery(
 
 @strawberry.type
 class RootMutation(
-    LocationMutation
+    LocationMutation,
+    SightingMutation,
 ):
     """
     Root GQL mutation, inherits from all other mutations

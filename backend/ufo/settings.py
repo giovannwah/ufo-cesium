@@ -138,4 +138,5 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOCATION_DISTANCE_THRESHOLD = 50  # meters
+LOCATION_DISTANCE_THRESHOLD = 50  # arbitrary location threshold, in meters
+SIGHTING_TIME_THRESHOLD = 900  # arbitrary sighting time threshold, in seconds (15 mins)

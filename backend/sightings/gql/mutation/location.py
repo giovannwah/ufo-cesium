@@ -4,7 +4,7 @@ from strawberry.types import Info
 from sightings.gql.types.location import (
     LocationType,
 )
-from sightings.helpers.locations import create_location
+from sightings.helpers.locations import verify_and_create_location
 from sightings.exceptions import LocationInputValidationException
 
 
@@ -25,7 +25,7 @@ class Mutation:
         Create a new Location object
         :return:
         """
-        location_type = create_location({
+        location = verify_and_create_location({
             "latitude": latitude,
             "longitude": longitude,
             "country": country,
@@ -33,8 +33,8 @@ class Mutation:
             "city": city,
         })
 
-        if location_type is not None:
-            return location_type
+        if location is not None:
+            return location
         else:
             msg = f'Could not validate coordinates ({latitude}, {longitude})'
             raise LocationInputValidationException(msg)

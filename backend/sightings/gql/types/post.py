@@ -37,3 +37,4 @@ class PostNode(gql.relay.Node):
     description: auto
     created_datetime: auto
     modified_datetime: auto
+

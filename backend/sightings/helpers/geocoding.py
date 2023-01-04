@@ -1,4 +1,5 @@
 from typing import Optional
+from strawberry_django_plus.relay import from_base64
 from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.conf import settings
@@ -69,6 +70,8 @@ STATE_MAP = {
     "WY": "Wyoming"
 }
 
+CLOSE_ENOUGH = 0.001  # an arbitrary latitude/longitude precision threshold value
+
 
 def distance_to_degrees(meters: float) -> float:
     if meters > 100000:
@@ -112,7 +115,7 @@ def evaluate_query(
     services: list, query: str, city: str = None, country: str = None, state: str = None
 ) -> bool:
     """
-    Evaluate whether a location query, "<latitude>, <longitude>", corresponds to an existing
+    Evaluate whether a location query, "<latitude>, <longitude>", corresponds to real
     location, using geocoders listed in services
     :param services: list of services to use to build geocoders
     :param query: string, "<latitude>, <longitude>"
@@ -128,7 +131,12 @@ def evaluate_query(
             geolocator = cls(**config)
             location = geolocator.reverse(query, language='en', zoom=10)
 
-            address = location.raw.get('address')
+            try:
+                address = location.raw.get('address')
+            except AttributeError as e:
+                raise LocationInputValidationException(
+                    f'Unable to validate latitude and longitude ({query}): {e}'
+                )
             city_or_town = address.get('city') if 'city' in address else address.get('town', "")
 
             if city and city.lower() != city_or_town.lower():
@@ -219,8 +227,27 @@ def map_state_abr_to_name(state_abr: str):
     return STATE_MAP.get(state_abr.upper(), None)
 
 
-def create_and_validate_location(
-    latitude: float, longitude: float, city: str = None, country: str = None, state: str = None
+def get_nearby_location(latitude: float, longitude: float) -> Location:
+    """
+    Return existing location that is within LOCATION_DISTANCE_THRESHOLD of (latitude, longitude),
+    or return None
+    :param latitude:
+    :param longitude:
+    :return:
+    """
+    query = generate_lat_lon_nearby_query(latitude, longitude, CLOSE_ENOUGH)
+    locations = Location.objects.filter(query)
+    nl = find_closest_location(locations, latitude, longitude)
+    return nl
+
+
+def get_or_create_location(
+    location_id: str = None,
+    latitude: float = None,
+    longitude: float = None,
+    city: str = None,
+    country: str = None,
+    state: str = None
 ) -> Optional[Location]:
     """
     Verify the new Location can be added given existing Locations. If the new location is
@@ -228,13 +255,15 @@ def create_and_validate_location(
     Otherwise, return new Location.
     :return:
     """
-    query = generate_lat_lon_nearby_query(latitude, longitude, 0.001)  # 0.001 is an arbitrary precision value
-    locations = Location.objects.filter(query)
-    nl = find_closest_location(locations, latitude, longitude)
 
-    if nl is None:
+    if location_id:
+        location = Location.objects.filter(pk=from_base64(location_id)[1]).first()
+    else:
+        location = get_nearby_location(latitude, longitude)
+
+    if location is None and latitude and longitude:
         state_name = map_state_abr_to_name(state.upper()) if state else None
-        loc = Location(
+        location = Location(
             latitude=latitude,
             longitude=longitude,
             city=city,
@@ -242,9 +271,9 @@ def create_and_validate_location(
             state=state.upper() if state else None,
             state_name=state_name
         )
-        return loc
+        location.save()
 
-    return nl
+    return location
 
 
 def locations_distance_within_q(

@@ -1,4 +1,5 @@
 from typing import Optional, List
+from datetime import datetime
 from strawberry import auto
 from strawberry_django_plus import gql
 from sightings.models import Sighting
@@ -26,3 +27,12 @@ class SightingNode(gql.relay.Node):
     sighting_datetime: auto
     created_datetime: auto
     modified_datetime: auto
+
+
+@gql.django.type(Sighting)
+class SightingType:
+    id: str
+    location: LocationNode
+    sighting_datetime: datetime
+    created_datetime: datetime
+    modified_datetime: datetime

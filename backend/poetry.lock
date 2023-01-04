@@ -132,6 +132,21 @@ setproctitle = ["setproctitle"]
 tornado = ["tornado (>=0.2)"]
 
 [[package]]
+name = "loguru"
+version = "0.6.0"
+description = "Python logging made (stupidly) simple"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+colorama = {version = ">=0.3.4", markers = "sys_platform == \"win32\""}
+win32-setctime = {version = ">=1.0.0", markers = "sys_platform == \"win32\""}
+
+[package.extras]
+dev = ["sphinx-rtd-theme (>=0.4.3)", "sphinx-autobuild (>=0.7.1)", "Sphinx (>=4.1.1)", "isort (>=5.1.1)", "black (>=19.10b0)", "pytest-cov (>=2.7.1)", "pytest (>=4.6.2)", "tox (>=3.9.0)", "flake8 (>=3.7.7)", "docutils (==0.16)", "colorama (>=0.3.4)"]
+
+[[package]]
 name = "psycopg2"
 version = "2.9.3"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
@@ -309,10 +324,21 @@ category = "main"
 optional = false
 python-versions = ">=3.7"
 
+[[package]]
+name = "win32-setctime"
+version = "1.1.0"
+description = "A small Python utility to set file creation time on Windows"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.extras]
+dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "6af6b2eb3dfb6008ee1d6086cecb02b0c45951eef3ca3a44386a78296fdaaaad"
+content-hash = "7ba26dbc438a09889740a9683e756b1d329bea5dfce435e35f8969721629d86e"
 
 [metadata.files]
 asgiref = []
@@ -326,6 +352,7 @@ geographiclib = []
 geopy = []
 graphql-core = []
 gunicorn = []
+loguru = []
 psycopg2 = []
 pydantic = []
 pygments = []
@@ -340,3 +367,4 @@ strawberry-graphql = []
 strawberry-graphql-django = []
 typer = []
 typing-extensions = []
+win32-setctime = []
