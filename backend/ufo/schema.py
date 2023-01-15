@@ -5,12 +5,13 @@ from sightings.gql.query import (
     SightingQuery,
     PostQuery,
     ProfileQuery,
+    UserQuery,
 )
 from sightings.gql.mutation import (
     LocationMutation,
     SightingMutation,
-    PostMutation,
     ProfileMutation,
+    PostMutation,
     UserMutation,
 )
 
@@ -20,7 +21,8 @@ class RootQuery(
     LocationQuery,
     SightingQuery,
     PostQuery,
-    ProfileQuery
+    ProfileQuery,
+    UserQuery,
 ):
     """
     Root GQL query, inherits from all other queries
@@ -32,6 +34,9 @@ class RootQuery(
 class RootMutation(
     LocationMutation,
     SightingMutation,
+    PostMutation,
+    ProfileMutation,
+    UserMutation,
 ):
     """
     Root GQL mutation, inherits from all other mutations

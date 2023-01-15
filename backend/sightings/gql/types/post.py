@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, List
 from strawberry import auto
 from strawberry_django_plus import gql
@@ -38,3 +39,14 @@ class PostNode(gql.relay.Node):
     created_datetime: auto
     modified_datetime: auto
 
+
+@gql.django.type(Post)
+class PostType:
+    id: str
+    user: UserNode
+    sighting: SightingNode
+    ufo_shape: str
+    duration: str
+    description: str
+    created_datetime: datetime
+    modified_datetime: datetime

@@ -12,3 +12,21 @@ class UserNode(gql.relay.Node):
     email: auto
     first_name: auto
     last_name: auto
+
+
+@gql.input
+class UserInput:
+    username: str
+    password: str
+    email: str
+    first_name: str
+    last_name: str
+
+
+@gql.django.type(User)
+class UserType:
+    id: str
+    username: str
+    email: str
+    first_name: str
+    last_name: str

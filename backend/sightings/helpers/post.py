@@ -14,6 +14,7 @@ from sightings.helpers.locations import (
     locations_q_by_city_exact,
     locations_q_by_country_exact,
 )
+from sightings.gql.types.post import PostType
 
 
 def posts_q_by_state_exact(state_exact: str):
@@ -166,3 +167,7 @@ def posts_q_by_sighting_time_before(time_before: time):
         return Q()
 
     return Q(sighting__created_datetime__time__lt=time_before)
+
+
+def verify_and_create_post(post_input: dict) -> PostType:
+    return PostType()

@@ -33,4 +33,11 @@ class FilterValidationException(Exception):
     pass
 
 
+class ProfileInputValidationException(Exception):
+    """
+    Raise when exception occurs during some profile operation
+    """
+    pass
+
+
 
