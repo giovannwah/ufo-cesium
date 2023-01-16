@@ -1,8 +1,9 @@
-from datetime import date, time
+from datetime import date, time, datetime
+from strawberry_django_plus.relay import to_base64, from_base64
 from django.db.models.query import Q
+from django.contrib.auth.models import User
 from sightings.helpers.common import (
     generate_search_query,
-    update_filter_args,
 )
 from sightings.helpers.locations import (
     locations_q_by_state_contains,
@@ -14,7 +15,12 @@ from sightings.helpers.locations import (
     locations_q_by_city_exact,
     locations_q_by_country_exact,
 )
-from sightings.gql.types.post import PostType
+from sightings.helpers.geocoding import get_or_create_location
+from sightings.helpers.sighting import get_or_create_sighting
+from sightings.gql.types.post import PostType, PostNode
+from sightings.models import Post
+from sightings.exceptions import PostInputValidationException
+
 
 
 def posts_q_by_state_exact(state_exact: str):
@@ -170,4 +176,41 @@ def posts_q_by_sighting_time_before(time_before: time):
 
 
 def verify_and_create_post(post_input: dict) -> PostType:
-    return PostType()
+    user = User.objects.filter(id=from_base64(post_input.get('user_id'))[1]).first()
+    sighting_args = post_input.get('sighting')
+    location_args = sighting_args.get('location')
+    sighting_datetime_str = sighting_args.get('sighting_datetime')
+    sighting_id = sighting_args.get('sighting_id')
+    if location_args is not None and sighting_datetime_str is not None:
+        location = get_or_create_location(**location_args.__dict__)
+        sighting_datetime = datetime.fromisoformat(sighting_datetime_str)
+        sighting = get_or_create_sighting(
+            location=location,
+            sighting_datetime=sighting_datetime,
+        )
+    elif sighting_id is not None:
+        sighting = get_or_create_sighting(
+            sighting_id=sighting_id
+        )
+    else:
+        raise PostInputValidationException(f"Could not validate input to create Post: {post_input}")
+
+    post = Post(
+        user=user,
+        sighting=sighting,
+        ufo_shape=post_input.get('ufo_shape'),
+        duration=post_input.get('duration'),
+        description=post_input.get('description')
+    )
+    post.save()
+
+    return PostType(
+        id=to_base64(PostNode.__name__, post.pk),
+        user=post.user,
+        sighting=post.sighting,
+        ufo_shape=post.ufo_shape,
+        duration=post.duration,
+        description=post.description,
+        created_datetime=post.created_datetime,
+        modified_datetime=post.modified_datetime
+    )

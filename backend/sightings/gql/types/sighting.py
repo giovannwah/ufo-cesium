@@ -3,7 +3,9 @@ from datetime import datetime
 from strawberry import auto
 from strawberry_django_plus import gql
 from sightings.models import Sighting
-from sightings.gql.types.location import LocationNode, LocationFilterInput
+from sightings.gql.types.location import (
+    LocationNode, LocationFilterInput, LocationInput,
+)
 from sightings.gql.types.datetime import DateTimeFilterInput
 
 
@@ -36,3 +38,10 @@ class SightingType:
     sighting_datetime: datetime
     created_datetime: datetime
     modified_datetime: datetime
+
+
+@gql.input
+class SightingInput:
+    location: Optional[LocationInput]
+    sighting_datetime: Optional[str]
+    sighting_id: Optional[str]

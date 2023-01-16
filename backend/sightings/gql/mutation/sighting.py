@@ -8,15 +8,15 @@ from sightings.helpers.sighting import verify_and_create_sighting
 @gql.type
 class Mutation:
     @gql.relay.input_mutation(
-        description="Create a new Sighting object"
+        description="Create a new Sighting"
     )
     def create_new_sighting(
         info: Info,
-        location_input: LocationInput,
+        location: LocationInput,
         sighting_datetime: str,
     ) -> SightingType:
-        sighting_input = {
-            'location_input': location_input.__dict__,
+        sighting_args = {
+            'location': location.__dict__,
             'sighting_datetime': sighting_datetime
         }
-        return verify_and_create_sighting(sighting_input)
+        return verify_and_create_sighting(sighting_args)

@@ -20,6 +20,7 @@ from sightings.helpers.locations import (
 )
 from sightings.gql.types.sighting import SightingType, SightingNode
 from sightings.helpers.geocoding import get_or_create_location
+from sightings.exceptions import SightingInputValidationException
 
 
 def sightings_q_by_state_exact(state_exact: str):
@@ -194,20 +195,28 @@ def get_or_create_sighting(
 
 
 def verify_and_create_sighting(sighting_input: dict) -> SightingType:
-    location_input = sighting_input.get('location_input')
+    location_args = sighting_input.get('location')
     sighting_datetime = sighting_input.get('sighting_datetime')
+    sighting_id = sighting_input.get('sighting_id')
 
-    location = get_or_create_location(**location_input)
-    sighting_dt = datetime.fromisoformat(sighting_datetime)
+    if location_args is not None and sighting_datetime is not None:
+        location = get_or_create_location(**location_args)
+        sighting_dt = datetime.fromisoformat(sighting_datetime)
 
-    sighting = get_or_create_sighting(
-        location=location,
-        sighting_datetime=sighting_dt
-    )
+        sighting = get_or_create_sighting(
+            location=location,
+            sighting_datetime=sighting_dt,
+        )
+    elif sighting_id is not None:
+        sighting = get_or_create_sighting(sighting_id=sighting_id)
+    else:
+        raise SightingInputValidationException(
+            "Sighting input must contain either location and sighting datetime or a sighting ID"
+        )
 
     return SightingType(
         id=to_base64(SightingNode.__name__, sighting.pk),
-        location=location,
+        location=sighting.location,
         sighting_datetime=sighting.sighting_datetime,
         created_datetime=sighting.created_datetime,
         modified_datetime=sighting.modified_datetime,

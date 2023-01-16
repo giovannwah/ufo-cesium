@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import List
 from strawberry_django_plus import gql
 from strawberry_django_plus.relay import from_base64, to_base64
 from strawberry.types import Info
@@ -15,7 +15,7 @@ class Mutation:
     def add_to_favorites(
         info: Info,
         profile_id: str,
-        post_ids: Iterable[str]  # post ids
+        post_ids: List[str]  # post ids
     ) -> ProfileType:
         profile = Profile.objects.filter(id=from_base64(profile_id)[1]).first()
         if profile:
@@ -35,7 +35,7 @@ class Mutation:
     def remove_from_favorites(
         info: Info,
         profile_id: str,
-        post_ids: Iterable[str]
+        post_ids: List[str]
     ) -> ProfileType:
         profile = Profile.objects.filter(id=from_base64(profile_id)[1]).first()
         if profile:

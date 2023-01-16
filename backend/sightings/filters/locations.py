@@ -172,6 +172,10 @@ class LocationIdsFilter(SimpleFilter):
 
 def get_location_filters(linput: LocationFilterInput):
     ret = []
+
+    if not linput:
+        return ret
+
     if linput.city_exact or linput.state_exact or linput.country_exact or linput.state_name_exact:
         ret.append(
             LocationExactFilter(
