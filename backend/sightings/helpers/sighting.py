@@ -202,6 +202,8 @@ def verify_and_create_sighting(sighting_input: dict) -> SightingType:
     if location_args is not None and sighting_datetime is not None:
         location = get_or_create_location(**location_args)
         sighting_dt = datetime.fromisoformat(sighting_datetime)
+        if sighting_dt > datetime.now(tz=sighting_dt.tzinfo):
+            raise SightingInputValidationException(f"Cannot create a sighting in the future: {sighting_datetime}")
 
         sighting = get_or_create_sighting(
             location=location,

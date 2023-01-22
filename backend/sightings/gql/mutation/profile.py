@@ -19,7 +19,8 @@ class Mutation:
     ) -> ProfileType:
         profile = Profile.objects.filter(id=from_base64(profile_id)[1]).first()
         if profile:
-            profile.favorites.add(*[from_base64(post_id)[1] for post_id in post_ids])
+            add_ids = [from_base64(post_id)[1] for post_id in post_ids]
+            profile.favorites.add(*add_ids)
 
             return ProfileType(
                 id=to_base64(ProfileNode.__name__, profile.pk),
@@ -39,7 +40,8 @@ class Mutation:
     ) -> ProfileType:
         profile = Profile.objects.filter(id=from_base64(profile_id)[1]).first()
         if profile:
-            profile.favorites.remove(*[from_base64(post_id)[1] for post_id in post_ids])
+            remove_ids = [from_base64(post_id)[1] for post_id in post_ids]
+            profile.favorites.remove(*remove_ids)
 
             return ProfileType(
                 id=to_base64(ProfileNode.__name__, profile.pk),

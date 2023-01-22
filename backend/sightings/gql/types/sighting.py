@@ -42,6 +42,6 @@ class SightingType:
 
 @gql.input
 class SightingInput:
-    location: Optional[LocationInput]
-    sighting_datetime: Optional[str]
-    sighting_id: Optional[str]
+    location: Optional[LocationInput] = None
+    sighting_datetime: Optional[str] = None
+    sighting_id: Optional[str] = None
